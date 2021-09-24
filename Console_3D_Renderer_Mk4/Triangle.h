@@ -12,6 +12,7 @@ public:
 
 	Triangle();
 	Triangle(Vertex*, Vertex*, Vertex*);
+	~Triangle();
 };
 
 #endif

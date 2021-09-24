@@ -22,3 +22,14 @@ Triangle::Triangle(Vertex* vertex0, Vertex* vertex1, Vertex* vertex2)
 
 	normal = normal / normal.abs();
 }
+
+Triangle::~Triangle()
+{
+	for (int v = 0; v < 3; v++)
+	{
+		vertices[v] = nullptr;
+	}
+
+	delete[] vertices;
+	vertices = nullptr;
+}

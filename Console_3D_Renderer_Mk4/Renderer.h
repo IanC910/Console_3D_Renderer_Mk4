@@ -50,6 +50,7 @@ private:
 	static void calcScreenCoords();
 	static void writeControls();
 	static void titleScreen();
+	static void reset();
 
 };
 

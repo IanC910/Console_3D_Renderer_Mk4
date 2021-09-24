@@ -22,6 +22,8 @@ void Renderer::initRenderer(int screenWidth, int screenHeight)
 	observer0.moveSpeed = moveSpeed;
 	observer0.turnSpeed = turnSpeed;
 
+	reset();
+
 	initialized = true;
 }
 
@@ -79,11 +81,12 @@ void Renderer::render(std::string filePath)
 
 		//  Removing Vertices from screen array
 
-		while (!printedPositions.empty())
+		/*while (!printedPositions.empty())
 		{
 			Display::write(printedPositions.front(), ' ');
 			printedPositions.pop_front();
-		}
+		}*/
+		Display::setBlank();
 
 		//  Checking elapsed time
 
@@ -96,11 +99,14 @@ void Renderer::render(std::string filePath)
 		observer0.GetUserInput(deltaTime);
 
 	} // End of Main Loop
+
+	reset();
 }
 
 void Renderer::initObjectFromFile(std::string filePath)
 {
 	vertices.clear();
+	triangles.clear();
 
 	std::ifstream inFile(filePath);
 	std::string line;
@@ -120,6 +126,9 @@ void Renderer::initObjectFromFile(std::string filePath)
 	while (std::getline(inFile, line) && line != "END")
 	{
 		std::istringstream inString(line);
+
+		if (line == "")
+			continue;
 
 		std::getline(inString, strX, ',');
 		std::getline(inString, strY, ',');
@@ -143,6 +152,9 @@ void Renderer::initObjectFromFile(std::string filePath)
 	while (std::getline(inFile, line) && line != "END")
 	{
 		std::istringstream inString(line);
+
+		if (line == "")
+			continue;
 
 		std::getline(inString, sVertex1, ',');
 		std::getline(inString, sVertex2, ',');
@@ -218,4 +230,25 @@ void Renderer::titleScreen()
 
 	while (!GetAsyncKeyState(VK_SPACE))
 	{ /* Wait for Space to be pressed */ }
+}
+
+void Renderer::reset()
+{
+	// Delete all triangles
+	for (int t = 0; t < triangles.size(); t++) // for each triangle
+	{
+		delete triangles[t];
+		triangles[t] = nullptr;
+	}
+
+	triangles.clear();
+
+	// Delete all vertices
+	for (int v = 0; v < vertices.size(); v++) // for each vertex
+	{
+		delete vertices[v];
+		vertices[v] = nullptr;
+	}
+
+	vertices.clear();
 }
