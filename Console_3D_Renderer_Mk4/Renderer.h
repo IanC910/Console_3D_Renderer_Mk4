@@ -13,11 +13,12 @@ initRenderer must be called prior to render, and its arguments are the dimension
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include <string>
-#include <vector>
+#include "Common.h"
 
-#include "Screen.hpp"
-#include "Vertex.hpp"
+#include "Display.h"
+#include "Vertex.h"
+#include "Triangle.h"
+#include "Observer.h"
 
 class Renderer
 {
@@ -37,17 +38,18 @@ private:
 	static double turnSpeed; // Turning Speed in Radians per mircosecond
 	static int FOV; // Field of View in Degrees
 
-	static Screen* S;
-	static Observer User;
+	static Display display0;
+	static Observer observer0;
 	static double UnitsPerRadian;
 	static bool initialized;
-	static std::vector<Vertex> vertices;
+	static std::vector<Vertex*> vertices;
+	static std::vector<Triangle*> triangles;
 
 	Renderer(); // Private Constructor so class cannot be instantiated
-	static void initVerticesFromFile(std::string filePath);
+	static void initObjectFromFile(std::string filePath);
 	static void calcScreenCoords();
 	static void writeControls();
-	static void startupScreen();
+	static void titleScreen();
 
 };
 

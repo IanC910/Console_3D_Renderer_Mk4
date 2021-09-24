@@ -1,42 +1,26 @@
-#include <math.h>
-#include <Windows.h>
-#include <vector>
-#include <string>
-#include <queue>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <cstdlib>
-#include <chrono>
-#include <ctime>
-
-#include "Screen.hpp"
-#include "Vertex.hpp"
-#include "Vector3D.hpp"
-#include "Vector2D.hpp"
-#include "Renderer.hpp"
+#include "Renderer.h"
 
 
 double Renderer::moveSpeed = 6.0 / 1000000.0;
 double Renderer::turnSpeed = 1.4 / 1000000.0;
 int Renderer::FOV = 90;
 
-Screen* Renderer::S;
-Observer Renderer::User;
+Observer Renderer::observer0;
 double Renderer::UnitsPerRadian;
 bool Renderer::initialized = false;
-std::vector<Vertex> Renderer::vertices;
+std::vector<Vertex*> Renderer::vertices;
+std::vector<Triangle*> Renderer::triangles;
 
 void Renderer::initRenderer(int screenWidth, int screenHeight)
 {
-	S = new Screen(screenWidth, screenHeight);
-	UnitsPerRadian = static_cast<float>(S->width) / (FOV * pi / 180.0);
+	UnitsPerRadian = static_cast<float>(Display::width) / (FOV * PI / 180.0);
 
-	S->startScreen();
-	S->setBlank();
+	Display::initDisplay(screenWidth, screenHeight);
 
-	User = Observer(8, 0, 0);
-	User.horizAngle = pi;
+	observer0 = Observer(8, 0, 0);
+	observer0.horizLookAngle = PI;
+	observer0.moveSpeed = moveSpeed;
+	observer0.turnSpeed = turnSpeed;
 
 	initialized = true;
 }
@@ -49,72 +33,79 @@ void Renderer::render(std::string filePath)
 		exit(1);
 	}
 
-	initVerticesFromFile(filePath);
+	initObjectFromFile(filePath);
 
-	startupScreen();
+	titleScreen();
 
-	S->setBlank();
+	Display::setBlank();
 
-	std::queue<Vector2D> QVertexScreenPos; // for keeping track of vertices that have been written to S.screen
+	std::list<Vector2> printedPositions; // for keeping track of vertices that have been written to S.screen
 
 	auto timeStart = std::chrono::system_clock::now();
 	auto timeEnd = timeStart;
 
-	// ======================================================================== Main Loop
+	//  Main Loop
 
 	while (!GetAsyncKeyState(VK_ESCAPE))
 	{
 		calcScreenCoords();
 
-		// ======================================================================== Writing Vertices to screen array
+		//  Writing Vertices to screen array
 
-		for (int n = vertices.size() - 1; n >= 0; n--)
+		for (int t = 0; t < triangles.size(); t++) // for each triangle
 		{
-			// check if screen position of vertex is within screen boundaries
-			if (S->isValid(vertices[n].screenPos))
+			// if the triangle is visible: face's normal dot (line of sight to the triangle) is negative
+			if(triangles[t]->normal * (triangles[t]->vertices[0]->pos - observer0.pos) < 0)
 			{
-				S->write(vertices[n].screenPos, vertices[n].appearance);
-				QVertexScreenPos.push(vertices[n].screenPos); // keep track of vertices that have been printed so validity check is no longer needed for removal
+				for (int v = 0; v < 3; v++) // for each vertex of the triangle
+				{
+					// if screen position of vertex is within screen boundaries
+					if (Display::isValid(triangles[t]->vertices[v]->screenPos))
+					{
+						Display::write(triangles[t]->vertices[v]->screenPos, '#');
+						printedPositions.push_back(triangles[t]->vertices[v]->screenPos); // keep track of vertices that have been printed so validity check is no longer needed for removal
+					}
+				}
 			}
 		}
 
-		// ======================================================================== Writing Controls to screen array
+		//  Writing Controls to screen array
 
 		writeControls();
 
-		// ======================================================================== Printing screen to terminal
+		//  Printing screen to terminal
 
-		S->update();
+		Display::update();
 
-		// ======================================================================== Removing Vertices from screen array
+		//  Removing Vertices from screen array
 
-		while (!QVertexScreenPos.empty())
+		while (!printedPositions.empty())
 		{
-			S->write(QVertexScreenPos.front(), ' ');
-			QVertexScreenPos.pop();
+			Display::write(printedPositions.front(), ' ');
+			printedPositions.pop_front();
 		}
 
-		// ======================================================================== Checking elapsed time
+		//  Checking elapsed time
 
 		timeEnd = std::chrono::system_clock::now();
 		auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(timeEnd - timeStart).count();
 		timeStart = std::chrono::system_clock::now();
 
-		// ======================================================================== User Input
+		//  observer0 Input
 
-		User.GetUserInput(moveSpeed, turnSpeed, deltaTime);
+		observer0.GetUserInput(deltaTime);
 
 	} // End of Main Loop
 }
 
-void Renderer::initVerticesFromFile(std::string filePath)
+void Renderer::initObjectFromFile(std::string filePath)
 {
 	vertices.clear();
 
 	std::ifstream inFile(filePath);
 	std::string line;
-	std::string inX, inY, inZ;
-	float fX, fY, fZ;
+	std::string strX, strY, strZ;
+	float floX, floY, floZ;
 
 	if (!inFile.is_open())
 	{
@@ -130,47 +121,40 @@ void Renderer::initVerticesFromFile(std::string filePath)
 	{
 		std::istringstream inString(line);
 
-		std::getline(inString, inX, ',');
-		std::getline(inString, inY, ',');
-		std::getline(inString, inZ, '#');
+		std::getline(inString, strX, ',');
+		std::getline(inString, strY, ',');
+		std::getline(inString, strZ, '#');
 
-		fX = atof(inX.c_str());
-		fY = atof(inY.c_str());
-		fZ = atof(inZ.c_str());
+		floX = atof(strX.c_str());
+		floY = atof(strY.c_str());
+		floZ = atof(strZ.c_str());
 
-		vertices.push_back(Vertex(fX, fY, fZ));
+		vertices.push_back(new Vertex(floX, floY, floZ));
 	}
 
-	// Read vertex pairs for lines
+	// Read vertex triplets for triangles
 
 	std::getline(inFile, line); // Skip the blank line and header
 	std::getline(inFile, line);
 
-	std::string inV1, inV2;
-	int nV1, nV2;
-	float mX, mY, mZ;
-	double incr;
+	std::string sVertex1, sVertex2, sVertex3; // string representations of the vertex indices
+	int nVertex1, nVertex2, nVertex3; // Vertex indices in the vertices list
 
 	while (std::getline(inFile, line) && line != "END")
 	{
 		std::istringstream inString(line);
 
-		std::getline(inString, inV1, ',');
-		std::getline(inString, inV2, '#');
+		std::getline(inString, sVertex1, ',');
+		std::getline(inString, sVertex2, ',');
+		std::getline(inString, sVertex3, '#');
 
-		nV1 = atof(inV1.c_str());
-		nV2 = atof(inV2.c_str());
+		nVertex1 = atof(sVertex1.c_str());
+		nVertex2 = atof(sVertex2.c_str());
+		nVertex3 = atof(sVertex3.c_str());
 
-		// Create Line of vertices
+		// Create Triangles
 
-		Vector3D m(vertices[nV1].pos.x - vertices[nV2].pos.x, vertices[nV1].pos.y - vertices[nV2].pos.y, vertices[nV1].pos.z - vertices[nV2].pos.z);
-
-		incr = 0.2 / m.abs();
-
-		for (float t = incr; t < 1.0 - incr / 2.0; t += incr)
-		{
-			vertices.push_back(Vertex(m.x * t + vertices[nV2].pos.x, m.y * t + vertices[nV2].pos.y, m.z * t + vertices[nV2].pos.z, '-'));
-		}
+		triangles.push_back(new Triangle(vertices[nVertex1], vertices[nVertex2], vertices[nVertex3]));
 	}
 
 	inFile.close();
@@ -178,20 +162,20 @@ void Renderer::initVerticesFromFile(std::string filePath)
 
 void Renderer::calcScreenCoords()
 {
-	Vector3D ObsToP; // vector from User.pos to a vertex
-	Vector3D pVert; // Projection of ObsToP onto the vertical plane that the observer's line of sight goes through
-	Vector3D pHoriz; // Projection of ObsToP onto HPlane
-	Vector3D nVPlane; // Normal to the vertical plane: perpendicular to the user's line of sight, and whose z component is 0
-	Vector3D nHPlane; // Normal to HPlane: perpendicular to User.pos and nVPlane. Note: HPlane is not actually horizontal
+	Vector3 ObsToP; // vector from observer0.pos to a vertex
+	Vector3 pVert; // Projection of ObsToP onto the vertical plane that the observer's line of sight goes through
+	Vector3 pHoriz; // Projection of ObsToP onto HPlane
+	Vector3 nVPlane; // Normal to the vertical plane: perpendicular to the user's line of sight, and whose z component is 0
+	Vector3 nHPlane; // Normal to HPlane: perpendicular to observer0.pos and nVPlane. Note: HPlane is not actually horizontal
 
-	for (int n = 0; n < vertices.size(); n++)
+	for (int i = 0; i < vertices.size(); i++)
 	{
 		// project vector ObsToP onto vertical and horizontal planes to get angles
 
-		ObsToP = vertices[n].pos - User.pos;
+		ObsToP = vertices[i]->pos - observer0.pos;
 
-		nVPlane.set(User.LOS.y, -User.LOS.x, 0); // Right Rotation of User.LOS (with z = 0) clockwise. Direction is important for finding nHPlane
-		nHPlane = nVPlane.cross(User.LOS); // order is important. nHPlane must be pointing up (z > 0). Note: HPlane is not actually horizontal
+		nVPlane.set(observer0.lineOfSight.y, -observer0.lineOfSight.x, 0); // Right Rotation of observer0.lineOfSight (with z = 0) clockwise. Direction is important for finding nHPlane
+		nHPlane = nVPlane.cross(observer0.lineOfSight); // order is important. nHPlane must be pointing up (z > 0). Note: HPlane is not actually horizontal
 
 		pVert = ObsToP - ObsToP.projOnto(nVPlane); // Project ObsToP onto the vertical plane
 		pHoriz = ObsToP - ObsToP.projOnto(nHPlane); // Project ObsToP onto HPlane
@@ -200,37 +184,37 @@ void Renderer::calcScreenCoords()
 		// Dot product formula rearranged to isolate the angle
 		// multiply x and divide y by sqrt(2) for scaling (in the terminal, the characters are ~2x as tall as they are wide)
 
-		vertices[n].screenPos.y = static_cast<int>(acos(pVert * User.LOS / (pVert.abs() * User.LOS.abs())) * UnitsPerRadian) / sqrt(2.0);
-		vertices[n].screenPos.x = static_cast<int>(acos(pHoriz * User.LOS / (pHoriz.abs() * User.LOS.abs())) * UnitsPerRadian) * sqrt(2.0);
+		vertices[i]->screenPos.y = static_cast<int>(acos(pVert * observer0.lineOfSight / (pVert.abs() * observer0.lineOfSight.abs())) * UnitsPerRadian) / sqrt(2.0);
+		vertices[i]->screenPos.x = static_cast<int>(acos(pHoriz * observer0.lineOfSight / (pHoriz.abs() * observer0.lineOfSight.abs())) * UnitsPerRadian) * sqrt(2.0);
 		
 
 		// Note: At this point, the screen position components are positive by default because of acos()
 		// The following if-statements use the normal vectors to the vertical plane and HPlane to determine where on the screen the vertex should be:
 
-		if (vertices[n].pos * nHPlane < User.pos * nHPlane) // if the vertex is in the bottom half of the screen
-			vertices[n].screenPos.y *= -1;
+		if (vertices[i]->pos * nHPlane < observer0.pos * nHPlane) // if the vertex is in the bottom half of the screen
+			vertices[i]->screenPos.y *= -1;
 
-		if (vertices[n].pos * nVPlane < User.pos * nVPlane) // if the vertex is in the left half of the screen
-			vertices[n].screenPos.x *= -1;
+		if (vertices[i]->pos * nVPlane < observer0.pos * nVPlane) // if the vertex is in the left half of the screen
+			vertices[i]->screenPos.x *= -1;
 
-		vertices[n].screenPos.x += S->width / 2;
-		vertices[n].screenPos.y += S->height / 2;
+		vertices[i]->screenPos.x += Display::width / 2;
+		vertices[i]->screenPos.y += Display::height / 2;
 	}
 }
 
 void Renderer::writeControls()
 {
-	S->writeString(Vector2D(1, S->height - 1), "Use W, A, S, and D to move in the horizontal plane.");
-	S->writeString(Vector2D(1, S->height - 2), "Use SPACE and CTRL to move vertically.");
-	S->writeString(Vector2D(1, S->height - 3), "Use Arrow Keys to Look Around.");
-	S->writeString(Vector2D(1, S->height - 4), "Press ESC to exit the program.");
+	Display::write(Vector2(1, Display::height - 1), "Use W, A, S, and D to move in the horizontal plane.");
+	Display::write(Vector2(1, Display::height - 2), "Use SPACE and CTRL to move vertically.");
+	Display::write(Vector2(1, Display::height - 3), "Use Arrow Keys to Look Around.");
+	Display::write(Vector2(1, Display::height - 4), "Press ESC to exit the program.");
 }
 
-void Renderer::startupScreen()
+void Renderer::titleScreen()
 {
-	S->writeString(Vector2D(S->width / 2.0f - 8, S->height / 2.0f), "3D Renderer Mk3");
-	S->writeString(Vector2D(S->width / 2.0f - 10, S->height / 2.0f - 1), "Press Space to Start");
-	S->update();
+	Display::write(Vector2(Display::width / 2.0f - 8, Display::height / 2.0f), "3D Renderer Mk3");
+	Display::write(Vector2(Display::width / 2.0f - 10, Display::height / 2.0f - 1), "Press Space to Start");
+	Display::update();
 
 	while (!GetAsyncKeyState(VK_SPACE))
 	{ /* Wait for Space to be pressed */ }
