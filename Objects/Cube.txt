@@ -1,3 +1,4 @@
+Cube
 Vertices (x, y, z)
 1,1,1		# 0
 1,1,-1		# 1

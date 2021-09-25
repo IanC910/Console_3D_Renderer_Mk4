@@ -1,11 +1,11 @@
 #include "Renderer.h"
 
-
 double Renderer::moveSpeed = 6.0 / 1000000.0;
 double Renderer::turnSpeed = 1.4 / 1000000.0;
 int Renderer::FOV = 90;
 
 Observer Renderer::observer0;
+std::string Renderer::objectName;
 double Renderer::UnitsPerRadian;
 bool Renderer::initialized = false;
 std::vector<Vertex*> Renderer::vertices;
@@ -13,6 +13,8 @@ std::vector<Triangle*> Renderer::triangles;
 
 void Renderer::initRenderer(int screenWidth, int screenHeight)
 {
+	Debug::log("Initializing Renderer...");
+
 	UnitsPerRadian = static_cast<float>(Display::width) / (FOV * PI / 180.0);
 
 	Display::initDisplay(screenWidth, screenHeight);
@@ -25,77 +27,69 @@ void Renderer::initRenderer(int screenWidth, int screenHeight)
 	reset();
 
 	initialized = true;
+
+	Debug::log("Renderer Initialized");
 }
 
 void Renderer::render(std::string filePath)
 {
 	if (!initialized)
 	{
-		std::cout << "Renderer not initialized";
+		Debug::log("\nERROR: Attempted to render an object when renderer not initialized");
 		exit(1);
 	}
 
 	initObjectFromFile(filePath);
 
+	Debug::log("Starting render of object \"" + objectName + "\"");
+
 	titleScreen();
 
 	Display::setBlank();
-
-	std::list<Vector2> printedPositions; // for keeping track of vertices that have been written to S.screen
 
 	auto timeStart = std::chrono::system_clock::now();
 	auto timeEnd = timeStart;
 
 	//  Main Loop
-
 	while (!GetAsyncKeyState(VK_ESCAPE))
 	{
 		calcScreenCoords();
 
 		//  Writing Vertices to screen array
-
 		for (int t = 0; t < triangles.size(); t++) // for each triangle
 		{
-			// if the triangle is visible: face's normal dot (line of sight to the triangle) is negative
-			if(triangles[t]->normal * (triangles[t]->vertices[0]->pos - observer0.pos) < 0)
+			// brightness is an indicator of how much the triangle is facing the observer
+			double brightness = -1.0f * triangles[t]->normal.normalized() * (triangles[t]->vertices[0]->pos - observer0.pos).normalized();
+
+			if(brightness > 0)
 			{
-				for (int v = 0; v < 3; v++) // for each vertex of the triangle
-				{
-					// if screen position of vertex is within screen boundaries
-					if (Display::isValid(triangles[t]->vertices[v]->screenPos))
-					{
-						Display::write(triangles[t]->vertices[v]->screenPos, '#');
-						printedPositions.push_back(triangles[t]->vertices[v]->screenPos); // keep track of vertices that have been printed so validity check is no longer needed for removal
-					}
-				}
+				// Find character to draw based on given brightness
+				wchar_t charToDraw;
+
+				if		(brightness > 0.75f)	charToDraw = 0x2588;
+				else if (brightness > 0.5f)		charToDraw = 0x2591;
+				else if (brightness > 0.25f)	charToDraw = 0x2592;
+				else							charToDraw = 0x2593;
+
+				Display::drawTriangle(triangles[t]->vertices[0]->screenPos, triangles[t]->vertices[1]->screenPos, triangles[t]->vertices[2]->screenPos, charToDraw);
 			}
 		}
 
 		//  Writing Controls to screen array
-
 		writeControls();
 
 		//  Printing screen to terminal
-
 		Display::update();
 
-		//  Removing Vertices from screen array
-
-		/*while (!printedPositions.empty())
-		{
-			Display::write(printedPositions.front(), ' ');
-			printedPositions.pop_front();
-		}*/
+		//  Reset screen array
 		Display::setBlank();
 
 		//  Checking elapsed time
-
 		timeEnd = std::chrono::system_clock::now();
 		auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(timeEnd - timeStart).count();
 		timeStart = std::chrono::system_clock::now();
 
-		//  observer0 Input
-
+		//  observer Input
 		observer0.GetUserInput(deltaTime);
 
 	} // End of Main Loop
@@ -115,14 +109,16 @@ void Renderer::initObjectFromFile(std::string filePath)
 
 	if (!inFile.is_open())
 	{
-		std::cout << "\n\nERROR: Couldn't open Object File\n\n";
+		Debug::log("\nERROR: Couldn't open object file");
 		exit(1);
 	}
 
-	std::getline(inFile, line); // Skip the header
+	std::getline(inFile, objectName); // Object Name
+	std::getline(inFile, line); // Skip vertices header
+
+	Debug::log("Opened object file of object \"" + objectName + "\"");
 
 	// Read vertices
-
 	while (std::getline(inFile, line) && line != "END")
 	{
 		std::istringstream inString(line);
@@ -142,8 +138,7 @@ void Renderer::initObjectFromFile(std::string filePath)
 	}
 
 	// Read vertex triplets for triangles
-
-	std::getline(inFile, line); // Skip the blank line and header
+	std::getline(inFile, line); // Skip the blank line and triangles header
 	std::getline(inFile, line);
 
 	std::string sVertex1, sVertex2, sVertex3; // string representations of the vertex indices
@@ -165,7 +160,6 @@ void Renderer::initObjectFromFile(std::string filePath)
 		nVertex3 = atof(sVertex3.c_str());
 
 		// Create Triangles
-
 		triangles.push_back(new Triangle(vertices[nVertex1], vertices[nVertex2], vertices[nVertex3]));
 	}
 
@@ -195,9 +189,8 @@ void Renderer::calcScreenCoords()
 
 		// Dot product formula rearranged to isolate the angle
 		// multiply x and divide y by sqrt(2) for scaling (in the terminal, the characters are ~2x as tall as they are wide)
-
-		vertices[i]->screenPos.y = static_cast<int>(acos(pVert * observer0.lineOfSight / (pVert.abs() * observer0.lineOfSight.abs())) * UnitsPerRadian) / sqrt(2.0);
-		vertices[i]->screenPos.x = static_cast<int>(acos(pHoriz * observer0.lineOfSight / (pHoriz.abs() * observer0.lineOfSight.abs())) * UnitsPerRadian) * sqrt(2.0);
+		vertices[i]->screenPos.y = (int)(acos(pVert * observer0.lineOfSight / (pVert.abs() * observer0.lineOfSight.abs())) * UnitsPerRadian) / sqrt(2.0);
+		vertices[i]->screenPos.x = (int)(acos(pHoriz * observer0.lineOfSight / (pHoriz.abs() * observer0.lineOfSight.abs())) * UnitsPerRadian) * sqrt(2.0);
 		
 
 		// Note: At this point, the screen position components are positive by default because of acos()
@@ -211,6 +204,16 @@ void Renderer::calcScreenCoords()
 
 		vertices[i]->screenPos.x += Display::width / 2;
 		vertices[i]->screenPos.y += Display::height / 2;
+
+		// Cap the screen positions. Otherwise, Display::drawTriangle bugs sometimes
+		if (vertices[i]->screenPos.x > Display::width + 5)
+			vertices[i]->screenPos.x = Display::width + 5;
+		if (vertices[i]->screenPos.x < -Display::width - 5)
+			vertices[i]->screenPos.x = -Display::width - 5;
+		if (vertices[i]->screenPos.y > Display::height + 5)
+			vertices[i]->screenPos.y = Display::height + 5;
+		if (vertices[i]->screenPos.y < -Display::height - 5)
+			vertices[i]->screenPos.y = -Display::height - 5;
 	}
 }
 
@@ -251,4 +254,6 @@ void Renderer::reset()
 	}
 
 	vertices.clear();
+
+	Debug::log("Renderer Reset");
 }

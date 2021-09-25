@@ -38,8 +38,8 @@ private:
 	static double turnSpeed; // Turning Speed in Radians per mircosecond
 	static int FOV; // Field of View in Degrees
 
-	static Display display0;
 	static Observer observer0;
+	static std::string objectName;
 	static double UnitsPerRadian;
 	static bool initialized;
 	static std::vector<Vertex*> vertices;

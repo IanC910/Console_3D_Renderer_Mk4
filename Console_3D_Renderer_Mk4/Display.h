@@ -27,6 +27,9 @@ public:
 	static void write(Vector2, std::string);
 	// Writes a string left to right to the Display array, starting at the position specified by the vector
 
+	static void drawTriangle(Vector2, Vector2, Vector2, wchar_t);
+	// draws triangle at 3 points with a given brightness from 0 to 1
+
 	static void setBlank();
 
 	static bool isValid(Vector2);

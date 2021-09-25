@@ -17,5 +17,16 @@
 
 const double PI = 2 * acos(0);
 
+class Debug
+{
+public:
+	static void log(std::string);
+
+private:
+	static std::ofstream* logFile;
+
+	Debug();
+};
+
 
 #endif
