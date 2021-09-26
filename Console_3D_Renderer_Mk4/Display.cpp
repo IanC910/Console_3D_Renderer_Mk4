@@ -54,7 +54,7 @@ void Display::write(Vector2 pos, std::string s)
 	}
 }
 
-void Display::drawTriangle(Vector2 vertex0, Vector2 vertex1, Vector2 vertex2, wchar_t c)
+void Display::drawTriangle(Vector2 vertex0, Vector2 vertex1, Vector2 vertex2, wchar_t fillChar)
 {
 	/*// Draw only Vertices
 	write(vertex0, '0');
@@ -62,88 +62,130 @@ void Display::drawTriangle(Vector2 vertex0, Vector2 vertex1, Vector2 vertex2, wc
 	write(vertex2, '2');
 	return;*/
 
+	// If all vertices are in the same horizontal position, the triangle has no area: no need to draw anything
+	if (vertex0.x == vertex1.x && vertex1.x == vertex2.x)
+		return;
 
-	Vector2* lowHorizV = &vertex0;
-	Vector2* midHorizV = &vertex1;
-	Vector2* highHorizV = &vertex2;
-	
-	Vector2* lowVertV = &vertex0;
-	Vector2* midVertV = &vertex1;
-	Vector2* highVertV = &vertex2;
+	// If all vertices are in the same vertical position, the triangle has no area: no need to draw anything
+	if (vertex0.y == vertex1.y && vertex1.y == vertex2.y)
+		return;
 
-	wchar_t charToDraw;
+
+	Vector2* leftV = &vertex0; // point with lowest x
+	Vector2* middleV = &vertex1;
+	Vector2* rightV = &vertex2; // point with greatest x
 
 	// Sort vertices of triangle by position in the 2D screen plane
 	Vector2* tempV; // for swapping purposes
 
 	// Sort by horizontal position
-	if(midHorizV->x < lowHorizV->x)
+	if(middleV->x < leftV->x)
 	{
-		tempV = midHorizV;
-		midHorizV = lowHorizV;
-		lowHorizV = tempV;
+		tempV		= middleV;
+		middleV		= leftV;
+		leftV		= tempV;
 	}
 
-	if (highHorizV->x < lowHorizV->x)
+	if (rightV->x < leftV->x)
 	{
-		tempV = highHorizV;
-		highHorizV = lowHorizV;
-		lowHorizV = tempV;
+		tempV		= rightV;
+		rightV		= leftV;
+		leftV		= tempV;
 	}
 
-	if (highHorizV->x < midHorizV->x)
+	if (rightV->x < middleV->x)
 	{
-		tempV = highHorizV;
-		highHorizV = midHorizV;
-		midHorizV = tempV;
+		tempV		= rightV;
+		rightV		= middleV;
+		middleV		= tempV;
 	}
 
-	// Sort by vertical position
-	if (midVertV->y < lowVertV->y)
+	if (leftV->x == middleV->x && middleV->y < leftV->y) // if leftV and middleV occupy the same vertical line, make middleV the higher vertex by default
 	{
-		tempV = midVertV;
-		midVertV = lowVertV;
-		lowVertV = tempV;
+		Vector2* temp = middleV;
+		middleV = leftV;
+		leftV = temp;
 	}
 
-	if (highVertV->y < lowVertV->y)
+	if (middleV->x == rightV->x && middleV->y < rightV->y) // if middleV and rightV occupy the same vertical line, make middleV the higher vertex by default
 	{
-		tempV = highVertV;
-		highVertV = lowVertV;
-		lowVertV = tempV;
+		Vector2* temp = middleV;
+		middleV = rightV;
+		rightV = temp;
 	}
 
-	if (highVertV->y < midVertV->y)
-	{
-		tempV = highVertV;
-		highVertV = midVertV;
-		midVertV = tempV;
-	}
+	// Find the equations of the lines from leftV to middleV, leftV to rightV, and middleV to leftV
 
-	// Find vectors from lowHorizV to midHorizV, from lowHorizV to highHorizV, from midHorizV to lowHorizV, and from midHorizV to highHorizV
-	Vector2 leftToMiddle = (*midHorizV - *lowHorizV).normalized();
-	Vector2 leftToRight = (*highHorizV - *lowHorizV).normalized();
-	Vector2 middleToLeft = (*lowHorizV - *midHorizV).normalized();
-	Vector2 middleToRight = (*highHorizV - *midHorizV).normalized();
+	double leftToRightSlope = (rightV->y - leftV->y) / (rightV->x - leftV->x);
 
-	// Within the rectangle that the triangle is inscribed in, check if each point is inside the triangle
-	for (int x = lowHorizV->x; x <= highHorizV->x; x++)
+	double upperLineSlope = 0;
+	double lowerLineSlope = 0;
+	
+	// Fill part of triangle left of the middle vertex
+	if (leftV->x != middleV->x)
 	{
-		for (int y = lowVertV->y; y <= highVertV->y; y++)
+		double leftToMiddleSlope = (middleV->y - leftV->y) / (middleV->x - leftV->x);
+
+		if (atan(leftToMiddleSlope) > atan(leftToRightSlope))
 		{
-			Vector2 point(x, y);
+			upperLineSlope = leftToMiddleSlope;
+			lowerLineSlope = leftToRightSlope;
+		}
+		else if (atan(leftToMiddleSlope) < atan(leftToRightSlope))
+		{
+			upperLineSlope = leftToRightSlope;
+			lowerLineSlope = leftToMiddleSlope;
+		}
+		else // slopes are the same, triangle has no area, nothing to draw
+		{
+			return;
+		}
 
-			// if the point is inside the triangle
-			if (((point - *lowHorizV) * leftToMiddle > leftToRight * leftToMiddle) &&
-				((point - *lowHorizV) * leftToRight > leftToMiddle * leftToRight) &&
-				((point - *midHorizV) * middleToLeft > middleToRight * middleToLeft) &&
-				((point - *midHorizV) * middleToRight > middleToLeft * middleToRight))
+		for (int x = ceil(leftV->x); x < middleV->x; x++)
+		{
+			// y = m(x - x0) + y0
+			int upperYBound = floor(upperLineSlope * ((double)x - (double)leftV->x) + (double)leftV->y);
+			int lowerYBound = ceil(lowerLineSlope * ((double)x - (double)leftV->x) + (double)leftV->y);
+
+			for (int y = lowerYBound; y <= upperYBound; y++)
 			{
-				write(point, c);
+				write(x, y, fillChar);
 			}
 		}
 	}
+	
+	// Fill part of triangle right of the middle vertex
+	if (middleV->x != rightV->x)
+	{
+		double middleToRightSlope = (rightV->y - middleV->y) / (rightV->x - middleV->x);
 
+		if (atan(middleToRightSlope) < atan(leftToRightSlope))
+		{
+			upperLineSlope = middleToRightSlope;
+			lowerLineSlope = leftToRightSlope;
+		}
+		else if (atan(middleToRightSlope) > atan(leftToRightSlope))
+		{ 
+			upperLineSlope = leftToRightSlope;
+			lowerLineSlope = middleToRightSlope;
+		}
+		else // slopes are the same, triangle has no area, nothing to draw
+		{
+			return;
+		}
+
+		for (int x = ceil(middleV->x); x < rightV->x; x++)
+		{
+			// y = m(x - x0) + y0
+			int upperYBound = floor(upperLineSlope * ((double)x - (double)rightV->x) + (double)rightV->y);
+			int lowerYBound = ceil(lowerLineSlope * ((double)x - (double)rightV->x) + (double)rightV->y);
+
+			for (int y = lowerYBound; y <= upperYBound; y++)
+			{
+				write(x, y, fillChar);
+			}
+		}
+	}
 }
 
 void Display::setBlank()

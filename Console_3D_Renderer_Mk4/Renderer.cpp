@@ -5,11 +5,17 @@ double Renderer::turnSpeed = 1.4 / 1000000.0;
 int Renderer::FOV = 90;
 
 Observer Renderer::observer0;
-std::string Renderer::objectName;
+std::string Renderer::objectName = "";
 double Renderer::UnitsPerRadian;
 bool Renderer::initialized = false;
 std::vector<Vertex*> Renderer::vertices;
 std::vector<Triangle*> Renderer::triangles;
+
+// Lightest to darkest shades in inverted console colours
+wchar_t lightShade		= 0x2588; // lightest
+wchar_t medLightShade	= 0x2593;
+wchar_t medDarkShade	= 0x2592;
+wchar_t darkShade		= 0x2591; // darkest
 
 void Renderer::initRenderer(int screenWidth, int screenHeight)
 {
@@ -59,24 +65,24 @@ void Renderer::render(std::string filePath)
 		for (int t = 0; t < triangles.size(); t++) // for each triangle
 		{
 			// brightness is an indicator of how much the triangle is facing the observer
-			double brightness = -1.0f * triangles[t]->normal.normalized() * (triangles[t]->vertices[0]->pos - observer0.pos).normalized();
+			double brightness = triangles[t]->normal.normalized() * (observer0.pos - triangles[t]->vertices[0]->pos).normalized();
 
 			if(brightness > 0)
 			{
 				// Find character to draw based on given brightness
 				wchar_t charToDraw;
 
-				if		(brightness > 0.75f)	charToDraw = 0x2588;
-				else if (brightness > 0.5f)		charToDraw = 0x2591;
-				else if (brightness > 0.25f)	charToDraw = 0x2592;
-				else							charToDraw = 0x2593;
+				if (brightness > 0.75f)			charToDraw = lightShade;
+				else if (brightness > 0.5f)		charToDraw = medLightShade;
+				else if (brightness > 0.25f)    charToDraw = medDarkShade;
+				else							charToDraw = darkShade;
 
 				Display::drawTriangle(triangles[t]->vertices[0]->screenPos, triangles[t]->vertices[1]->screenPos, triangles[t]->vertices[2]->screenPos, charToDraw);
 			}
 		}
 
 		//  Writing Controls to screen array
-		writeControls();
+		writeUI();
 
 		//  Printing screen to terminal
 		Display::update();
@@ -217,18 +223,21 @@ void Renderer::calcScreenCoords()
 	}
 }
 
-void Renderer::writeControls()
+void Renderer::writeUI()
 {
 	Display::write(Vector2(1, Display::height - 1), "Use W, A, S, and D to move in the horizontal plane.");
 	Display::write(Vector2(1, Display::height - 2), "Use SPACE and CTRL to move vertically.");
 	Display::write(Vector2(1, Display::height - 3), "Use Arrow Keys to Look Around.");
 	Display::write(Vector2(1, Display::height - 4), "Press ESC to exit the program.");
+
+	Display::write(Vector2(Display::width / 2 - 10, Display::height - 1), "Object: " + ((objectName == "") ? "(No object name)" : objectName));
 }
 
 void Renderer::titleScreen()
 {
-	Display::write(Vector2(Display::width / 2.0f - 8, Display::height / 2.0f), "3D Renderer Mk3");
-	Display::write(Vector2(Display::width / 2.0f - 10, Display::height / 2.0f - 1), "Press Space to Start");
+	Display::write(Vector2(Display::width / 2.0f - 9, Display::height / 2.0f), "3D Console Renderer");
+	Display::write(Vector2(Display::width / 2.0f - 10, Display::height / 2.0f - 1), "Rendering object \"" + objectName + "\"");
+	Display::write(Vector2(Display::width / 2.0f - 10, Display::height / 2.0f - 2), "Press Space to Start");
 	Display::update();
 
 	while (!GetAsyncKeyState(VK_SPACE))

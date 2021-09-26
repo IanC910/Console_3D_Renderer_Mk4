@@ -1,2 +1,11 @@
+Initializing Renderer...
 Initializing Display...
 Display Initialized
+Renderer Reset
+Renderer Initialized
+Opened object file of object "Cube"
+Starting render of object "Cube"
+Renderer Reset
+Opened object file of object "Sphere"
+Starting render of object "Sphere"
+Renderer Reset
