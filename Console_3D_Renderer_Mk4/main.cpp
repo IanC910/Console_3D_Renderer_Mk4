@@ -26,13 +26,13 @@ void run()
 
 void testDrawTriangle()
 {
-	Debug::log("Starting Test: testDrawTriangle");
+	Debug::logInfo("testDrawTriangle", "Starting Test");
 
 	wchar_t fillChar = 0x2588;
 
 	Display::initDisplay(213, 50);
 
-	Debug::log("Drawing triangle 0...");
+	Debug::logInfo("testDrawTriangle", "Drawing triangle 0...");
 	Vector2 vec0(20, 20);
 	Vector2 vec1(40, 20);
 	Vector2 vec2(50, 30);
@@ -41,7 +41,7 @@ void testDrawTriangle()
 	Display::write(vec1, '1');
 	Display::write(vec2, '2');
 
-	Debug::log("Drawing triangle 1...");
+	Debug::logInfo("testDrawTriangle", "Drawing triangle 1...");
 	vec0.set(70, 20);
 	vec1.set(70, 40);
 	vec2.set(80, 25);
@@ -50,7 +50,7 @@ void testDrawTriangle()
 	Display::write(vec1, '1');
 	Display::write(vec2, '2');
 
-	Debug::log("Drawing triangle 2...");
+	Debug::logInfo("testDrawTriangle", "Drawing triangle 2...");
 	vec0.set(100, 20);
 	vec1.set(100, 30);
 	vec2.set(100, 40);
@@ -59,7 +59,7 @@ void testDrawTriangle()
 	Display::write(vec1, '1');
 	Display::write(vec2, '2');
 
-	Debug::log("Drawing triangle 3...");
+	Debug::logInfo("testDrawTriangle", "Drawing triangle 3...");
 	vec0.set(120, 40);
 	vec1.set(125, 30);
 	vec2.set(150, 20);

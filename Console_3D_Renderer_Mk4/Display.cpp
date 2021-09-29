@@ -10,7 +10,7 @@ HANDLE Display::consoleHandle;
 
 void Display::initDisplay(int initWidth, int initHeight)
 {
-	Debug::log("Initializing Display...");
+	Debug::logInfo("Display", "Initializing Display...");
 
 	width = initWidth;
 	height = initHeight;
@@ -23,7 +23,7 @@ void Display::initDisplay(int initWidth, int initHeight)
 
 	setBlank();
 
-	Debug::log("Display Initialized");
+	Debug::logInfo("Display", "Display Initialized");
 }
 
 void Display::update()
