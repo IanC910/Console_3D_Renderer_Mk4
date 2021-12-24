@@ -21,7 +21,7 @@ void Renderer::initRenderer(int screenWidth, int screenHeight)
 {
 	Debug::info("Renderer", "Initializing Renderer...");
 
-	UnitsPerRadian = static_cast<float>(Display::width) / (FOV * PI / 180.0);
+	UnitsPerRadian = Display::width / (FOV * PI / 180.0);
 
 	Display::initDisplay(screenWidth, screenHeight);
 
