@@ -48,6 +48,7 @@ private:
 	Renderer(); // Private Constructor so class cannot be instantiated
 	static void initObjectFromFile(std::string filePath);
 	static void calcScreenCoords();
+	static void drawEnvironment();
 	static void writeUI();
 	static void titleScreen();
 	static void reset();

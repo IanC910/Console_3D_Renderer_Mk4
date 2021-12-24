@@ -61,25 +61,7 @@ void Renderer::render(std::string filePath)
 	{
 		calcScreenCoords();
 
-		//  Writing Vertices to screen array
-		for (int t = 0; t < triangles.size(); t++) // for each triangle
-		{
-			// brightness is an indicator of how much the triangle is facing the observer
-			double brightness = triangles[t]->normal.normalized() * (observer0.pos - triangles[t]->vertices[0]->pos).normalized();
-
-			if(brightness > 0)
-			{
-				// Find character to draw based on given brightness
-				wchar_t charToDraw;
-
-				if (brightness > 0.75f)			charToDraw = lightShade;
-				else if (brightness > 0.5f)		charToDraw = medLightShade;
-				else if (brightness > 0.25f)    charToDraw = medDarkShade;
-				else							charToDraw = darkShade;
-
-				Display::drawTriangle(triangles[t]->vertices[0]->screenPos, triangles[t]->vertices[1]->screenPos, triangles[t]->vertices[2]->screenPos, charToDraw);
-			}
-		}
+		drawEnvironment();
 
 		//  Writing Controls to screen array
 		writeUI();
@@ -220,6 +202,29 @@ void Renderer::calcScreenCoords()
 			vertices[i]->screenPos.y = Display::height + 5;
 		if (vertices[i]->screenPos.y < -Display::height - 5)
 			vertices[i]->screenPos.y = -Display::height - 5;
+	}
+}
+
+void Renderer::drawEnvironment()
+{
+	//  Writing Vertices to screen array
+	for (int t = 0; t < triangles.size(); t++) // for each triangle
+	{
+		// brightness is an indicator of how much the triangle is facing the observer
+		double brightness = triangles[t]->normal.normalized() * (observer0.pos - triangles[t]->vertices[0]->pos).normalized();
+
+		if (brightness > 0)
+		{
+			// Find character to draw based on given brightness
+			wchar_t charToDraw;
+
+			if (brightness > 0.75f)			charToDraw = lightShade;
+			else if (brightness > 0.5f)		charToDraw = medLightShade;
+			else if (brightness > 0.25f)    charToDraw = medDarkShade;
+			else							charToDraw = darkShade;
+
+			Display::drawTriangle(triangles[t]->vertices[0]->screenPos, triangles[t]->vertices[1]->screenPos, triangles[t]->vertices[2]->screenPos, charToDraw);
+		}
 	}
 }
 
