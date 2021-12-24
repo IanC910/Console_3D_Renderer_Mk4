@@ -43,6 +43,7 @@ private:
 	// Field of View in Degrees
 	static int FOV;
 
+	static bool quit;
 	static Observer observer0;
 	static std::string objectName;
 	static double UnitsPerRadian;
@@ -60,6 +61,8 @@ private:
 	static void drawEnvironment();
 
 	static void writeUI();
+
+	static void processUserInput(long long deltaTime);
 
 	static void titleScreen();
 

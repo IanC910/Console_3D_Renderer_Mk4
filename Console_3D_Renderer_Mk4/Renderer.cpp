@@ -4,6 +4,8 @@ double Renderer::moveSpeed = 6.0 / 1000000.0;
 double Renderer::turnSpeed = 1.4 / 1000000.0;
 int Renderer::FOV = 90;
 
+bool Renderer::quit = 0;
+
 Observer Renderer::observer0;
 std::string Renderer::objectName = "";
 double Renderer::UnitsPerRadian;
@@ -27,8 +29,6 @@ void Renderer::initRenderer(int screenWidth, int screenHeight)
 
 	observer0 = Observer(8, 0, 0);
 	observer0.horizLookAngle = PI;
-	observer0.moveSpeed = moveSpeed;
-	observer0.turnSpeed = turnSpeed;
 
 	reset();
 
@@ -57,7 +57,7 @@ void Renderer::render(std::string filePath)
 	auto timeEnd = timeStart;
 
 	//  Main Loop
-	while (!GetAsyncKeyState(VK_ESCAPE))
+	while (!quit)
 	{
 		calcScreenCoords();
 
@@ -74,11 +74,10 @@ void Renderer::render(std::string filePath)
 
 		//  Checking elapsed time
 		timeEnd = std::chrono::system_clock::now();
-		auto deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(timeEnd - timeStart).count();
+		long long deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(timeEnd - timeStart).count();
 		timeStart = std::chrono::system_clock::now();
 
-		//  observer Input
-		observer0.GetUserInput(deltaTime);
+		processUserInput(deltaTime);
 
 	} // End of Main Loop
 
@@ -238,6 +237,102 @@ void Renderer::writeUI()
 	Display::write(Vector2(Display::width / 2 - 10, Display::height - 1), "Object: " + ((objectName == "") ? "(No object name)" : objectName));
 }
 
+void Renderer::processUserInput(long long deltaTime)
+{
+	// W:           0x57
+	// A:           0x41
+	// S:           0x53
+	// D:           0x44
+	// LCTRL:       0xA2
+	// Space:       0x20
+	// Left arrow:  0x25
+	// Up arrow:    0x26
+	// Right arrow: 0x27
+	// Down arrow:  0x28
+	// Esc:         0x1B
+
+	Vector3 directionOfMovement;
+
+	// W: move forward
+	if (GetAsyncKeyState('W'))
+	{
+		directionOfMovement = observer0.lineOfSight;
+		directionOfMovement.z = 0;
+		observer0.pos += directionOfMovement * moveSpeed * deltaTime / directionOfMovement.abs();
+	}
+
+	// S: move backward
+	if (GetAsyncKeyState('S'))
+	{
+		directionOfMovement = observer0.lineOfSight;
+		directionOfMovement.z = 0;
+		observer0.pos += directionOfMovement * (-moveSpeed) * deltaTime / directionOfMovement.abs();
+	}
+
+	// A: move left
+	if (GetAsyncKeyState('A')) // Move Left
+	{
+		directionOfMovement.set(-observer0.lineOfSight.y, observer0.lineOfSight.x, 0); // lineOfSight rotated PI/2 counter clockwise
+		observer0.pos += directionOfMovement * moveSpeed * deltaTime / directionOfMovement.abs();
+	}
+
+	// D: move right
+	if (GetAsyncKeyState('D')) // Move Right
+	{
+		directionOfMovement.set(observer0.lineOfSight.y, -observer0.lineOfSight.x, 0); // lineOfSight rotated PI/2 clockwise
+		observer0.pos += directionOfMovement * moveSpeed * deltaTime / directionOfMovement.abs();
+	}
+
+	// Space: move up
+	if (GetAsyncKeyState(VK_SPACE)) // Move UP
+	{
+		observer0.pos.z += moveSpeed * deltaTime * 0.8;
+	}
+
+	// LCTRL: move down
+	if (GetAsyncKeyState(VK_LCONTROL)) // Move Down
+	{
+		observer0.pos.z -= moveSpeed * deltaTime * 0.8;
+	}
+
+	// Up arrow: look up
+	if (GetAsyncKeyState(VK_UP) && observer0.vertLookAngle < PI / 2.0 - PI / 180.0) // Look Up
+	{
+		observer0.vertLookAngle += turnSpeed * deltaTime;
+	}
+
+	// Down arrow: look down
+	if (GetAsyncKeyState(VK_DOWN) && observer0.vertLookAngle > -PI / 2.0 + PI / 180.0) // Look Down
+	{
+		observer0.vertLookAngle -= turnSpeed * deltaTime;
+	}
+
+	// Left arrow: look left
+	if (GetAsyncKeyState(VK_LEFT)) // Look left
+	{
+		observer0.horizLookAngle += turnSpeed * deltaTime;
+	}
+
+	// Right arrow: look right
+	if (GetAsyncKeyState(VK_RIGHT)) // Look Right
+	{
+		observer0.horizLookAngle -= turnSpeed * deltaTime;
+	}
+
+	// Escape: quit
+	if (GetAsyncKeyState(VK_ESCAPE))
+	{
+		quit = 1;
+	}
+
+	// Update lineOfSight
+	observer0.lineOfSight.set(
+		cos(observer0.horizLookAngle) * cos(observer0.vertLookAngle),
+		sin(observer0.horizLookAngle) * cos(observer0.vertLookAngle),
+		sin(observer0.vertLookAngle));
+
+}
+
 void Renderer::titleScreen()
 {
 	Display::write(Vector2(Display::width / 2.0f - 9, Display::height / 2.0f), "3D Console Renderer");
@@ -268,6 +363,8 @@ void Renderer::reset()
 	}
 
 	vertices.clear();
+
+	quit = 0;
 
 	Debug::info("Renderer", "Renderer Reset");
 }
