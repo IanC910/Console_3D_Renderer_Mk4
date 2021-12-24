@@ -5,32 +5,32 @@ int Display::width = 120;
 int Display::height = 35;
 
 wchar_t* Display::screenArray = nullptr;
-DWORD Display::dwBytesWritten;
+DWORD Display::bytesWritten;
 HANDLE Display::consoleHandle;
 
 void Display::initDisplay(int initWidth, int initHeight)
 {
-	Debug::logInfo("Display", "Initializing Display...");
+	Debug::info("Display", "Initializing Display...");
 
 	width = initWidth;
 	height = initHeight;
 
 	// The following chunk of code was derived from https://www.youtube.com/watch?v=xW8skO7MFYw
 	screenArray = new wchar_t[width * height];
-	dwBytesWritten = 0;
+	bytesWritten = 0;
 	consoleHandle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	SetConsoleActiveScreenBuffer(consoleHandle);
 
 	setBlank();
 
-	Debug::logInfo("Display", "Display Initialized");
+	Debug::info("Display", "Display Initialized");
 }
 
 void Display::update()
 {	
 	// The following chunk of code was derived from https://www.youtube.com/watch?v=xW8skO7MFYw
 	screenArray[width * height - 1] = '\0';
-	WriteConsoleOutputCharacter(consoleHandle, screenArray, width * height, {0, 0}, &dwBytesWritten);
+	WriteConsoleOutputCharacter(consoleHandle, screenArray, width * height, {0, 0}, &bytesWritten);
 }
 
 void Display::write(int x, int y, wchar_t c)

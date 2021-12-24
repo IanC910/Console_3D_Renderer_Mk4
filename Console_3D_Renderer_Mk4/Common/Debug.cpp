@@ -3,7 +3,7 @@
 
 std::ofstream* Debug::logFile = nullptr;
 
-void Debug::logInfo(std::string tag, std::string message)
+void Debug::info(std::string tag, std::string message)
 {
 	if (logFile == nullptr)
 	{
@@ -12,11 +12,11 @@ void Debug::logInfo(std::string tag, std::string message)
 		logFile->clear();
 	}
 
-	*logFile << "INFO: [" << tag << "] " << message << "\n";
+	*logFile  << "INFO: [" << tag << "] " << message << "\n";
 	std::cout << "INFO: [" << tag << "] " << message << "\n";
 }
 
-void Debug::logError(std::string tag, std::string message)
+void Debug::error(std::string tag, std::string message)
 {
 	if (logFile == nullptr)
 	{
@@ -25,6 +25,6 @@ void Debug::logError(std::string tag, std::string message)
 		logFile->clear();
 	}
 
-	*logFile << "\nERROR: [" << tag << "] " << message << "\n\n";
+	*logFile  << "\nERROR: [" << tag << "] " << message << "\n\n";
 	std::cout << "\nERROR: [" << tag << "] " << message << "\n\n";
 }

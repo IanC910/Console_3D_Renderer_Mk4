@@ -38,7 +38,7 @@ public:
 private:
 	// Things from the youtube video: https://www.youtube.com/watch?v=xW8skO7MFYw
 	static wchar_t* screenArray;
-	static DWORD dwBytesWritten;
+	static DWORD bytesWritten;
 	static HANDLE consoleHandle;
 
 	Display();

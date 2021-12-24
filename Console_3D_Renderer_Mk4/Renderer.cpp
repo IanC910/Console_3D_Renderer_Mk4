@@ -19,7 +19,7 @@ wchar_t darkShade		= 0x2591; // darkest
 
 void Renderer::initRenderer(int screenWidth, int screenHeight)
 {
-	Debug::logInfo("Renderer", "Initializing Renderer...");
+	Debug::info("Renderer", "Initializing Renderer...");
 
 	UnitsPerRadian = static_cast<float>(Display::width) / (FOV * PI / 180.0);
 
@@ -34,20 +34,20 @@ void Renderer::initRenderer(int screenWidth, int screenHeight)
 
 	initialized = true;
 
-	Debug::logInfo("Renderer", "Renderer Initialized");
+	Debug::info("Renderer", "Renderer Initialized");
 }
 
 void Renderer::render(std::string filePath)
 {
 	if (!initialized)
 	{
-		Debug::logError("Renderer", "Attempted to render an object when renderer not initialized");
+		Debug::error("Renderer", "Attempted to render an object when renderer not initialized");
 		exit(1);
 	}
 
 	initObjectFromFile(filePath);
 
-	Debug::logInfo("Renderer", "Starting render of object \"" + objectName + "\"");
+	Debug::info("Renderer", "Starting render of object \"" + objectName + "\"");
 
 	titleScreen();
 
@@ -115,14 +115,14 @@ void Renderer::initObjectFromFile(std::string filePath)
 
 	if (!inFile.is_open())
 	{
-		Debug::logError("Renderer", "Couldn't open object file");
+		Debug::error("Renderer", "Couldn't open object file");
 		exit(1);
 	}
 
 	std::getline(inFile, objectName); // Object Name
 	std::getline(inFile, line); // Skip vertices header
 
-	Debug::logInfo("Renderer", "Opened object file of object \"" + objectName + "\"");
+	Debug::info("Renderer", "Opened object file of object \"" + objectName + "\"");
 
 	// Read vertices
 	while (std::getline(inFile, line) && line != "END")
@@ -264,5 +264,5 @@ void Renderer::reset()
 
 	vertices.clear();
 
-	Debug::logInfo("Renderer", "Renderer Reset");
+	Debug::info("Renderer", "Renderer Reset");
 }

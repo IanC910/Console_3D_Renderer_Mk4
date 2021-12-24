@@ -7,8 +7,8 @@
 class Debug
 {
 public:
-	static void logInfo(std::string, std::string);
-	static void logError(std::string, std::string);
+	static void info(std::string, std::string);
+	static void error(std::string, std::string);
 
 private:
 	static std::ofstream* logFile;
