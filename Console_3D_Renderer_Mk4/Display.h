@@ -21,18 +21,18 @@ public:
 	static void write(int, int, wchar_t);
 	// Writes a wide charcater to the Display array at the position specificed by two integer coordinates
 
-	static void write(Vector2, wchar_t);
+	static void write(Vec2, wchar_t);
 	// Writes a wide character to the Display array at the position specified by the vector
 
-	static void write(Vector2, std::string);
+	static void write(Vec2, std::string);
 	// Writes a string left to right to the Display array, starting at the position specified by the vector
 
-	static void drawTriangle(Vector2, Vector2, Vector2, wchar_t);
+	static void drawTriangle(Vec2, Vec2, Vec2, wchar_t);
 	// draws triangle at 3 points with a given brightness from 0 to 1
 
 	static void setBlank();
 
-	static bool isValid(Vector2);
+	static bool isValid(Vec2);
 	// Checks if the coordinate is inside Display boundaries
 
 private:

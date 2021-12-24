@@ -33,9 +33,9 @@ void testDrawTriangle()
 	Display::initDisplay(213, 50);
 
 	Debug::info("testDrawTriangle", "Drawing triangle 0...");
-	Vector2 vec0(20, 20);
-	Vector2 vec1(40, 20);
-	Vector2 vec2(50, 30);
+	Vec2 vec0(20, 20);
+	Vec2 vec1(40, 20);
+	Vec2 vec2(50, 30);
 	Display::drawTriangle(vec0, vec1, vec2, fillChar);
 	Display::write(vec0, '0');
 	Display::write(vec1, '1');

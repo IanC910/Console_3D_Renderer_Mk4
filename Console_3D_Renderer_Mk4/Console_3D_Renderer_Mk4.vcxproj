@@ -140,8 +140,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Common\Debug.cpp" />
-    <ClCompile Include="Common\Vector2.cpp" />
-    <ClCompile Include="Common\Vector3.cpp" />
+    <ClCompile Include="Common\Vec2.cpp" />
+    <ClCompile Include="Common\Vec3.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -152,8 +152,8 @@
   <ItemGroup>
     <ClInclude Include="Common\Common.h" />
     <ClInclude Include="Common\Debug.h" />
-    <ClInclude Include="Common\Vector2.h" />
-    <ClInclude Include="Common\Vector3.h" />
+    <ClInclude Include="Common\Vec2.h" />
+    <ClInclude Include="Common\Vec3.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Display.h" />

@@ -8,7 +8,7 @@ class Triangle
 {
 public:
 	Vertex** vertices;
-	Vector3 normal;
+	Vec3 normal;
 
 	Triangle();
 	Triangle(Vertex*, Vertex*, Vertex*);

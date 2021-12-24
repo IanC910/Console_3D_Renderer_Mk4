@@ -35,26 +35,26 @@ void Display::update()
 
 void Display::write(int x, int y, wchar_t c)
 {
-	if(isValid(Vector2(x, y)))
+	if(isValid(Vec2(x, y)))
 		screenArray[width * (height - y - 1) + x] = c;
 }
 
-void Display::write(Vector2 pos, wchar_t c)
+void Display::write(Vec2 pos, wchar_t c)
 {
 	if(isValid(pos))
 		screenArray[width * (height - static_cast<int>(pos.y) - 1) + static_cast<int>(pos.x)] = c;
 }
 
-void Display::write(Vector2 pos, std::string s)
+void Display::write(Vec2 pos, std::string s)
 {
 	for (int n = 0; n < s.size(); n++)
 	{
-		if(isValid(Vector2(pos)))
+		if(isValid(Vec2(pos)))
 			screenArray[width * (height - static_cast<int>(pos.y) - 1) + static_cast<int>(pos.x + n)] = s[n];
 	}
 }
 
-void Display::drawTriangle(Vector2 vertex0, Vector2 vertex1, Vector2 vertex2, wchar_t fillChar)
+void Display::drawTriangle(Vec2 vertex0, Vec2 vertex1, Vec2 vertex2, wchar_t fillChar)
 {
 	/*// Draw only Vertices
 	write(vertex0, '0');
@@ -71,12 +71,12 @@ void Display::drawTriangle(Vector2 vertex0, Vector2 vertex1, Vector2 vertex2, wc
 		return;
 
 
-	Vector2* leftV = &vertex0; // point with lowest x
-	Vector2* middleV = &vertex1;
-	Vector2* rightV = &vertex2; // point with greatest x
+	Vec2* leftV = &vertex0; // point with lowest x
+	Vec2* middleV = &vertex1;
+	Vec2* rightV = &vertex2; // point with greatest x
 
 	// Sort vertices of triangle by position in the 2D screen plane
-	Vector2* tempV; // for swapping purposes
+	Vec2* tempV; // for swapping purposes
 
 	// Sort by horizontal position
 	if(middleV->x < leftV->x)
@@ -102,14 +102,14 @@ void Display::drawTriangle(Vector2 vertex0, Vector2 vertex1, Vector2 vertex2, wc
 
 	if (leftV->x == middleV->x && middleV->y < leftV->y) // if leftV and middleV occupy the same vertical line, make middleV the higher vertex by default
 	{
-		Vector2* temp = middleV;
+		Vec2* temp = middleV;
 		middleV = leftV;
 		leftV = temp;
 	}
 
 	if (middleV->x == rightV->x && middleV->y < rightV->y) // if middleV and rightV occupy the same vertical line, make middleV the higher vertex by default
 	{
-		Vector2* temp = middleV;
+		Vec2* temp = middleV;
 		middleV = rightV;
 		rightV = temp;
 	}
@@ -196,7 +196,7 @@ void Display::setBlank()
 	}
 }
 
-bool Display::isValid(Vector2 P)
+bool Display::isValid(Vec2 P)
 {
 	return ((P.y < height) && (P.y > 0) && (P.x < width) && (P.x > 0));
 }

@@ -13,8 +13,8 @@
 #include <chrono>
 #include <ctime>
 
-#include "Vector2.h"
-#include "Vector3.h"
+#include "Vec2.h"
+#include "Vec3.h"
 #include "Debug.h"
 
 #define PI (2 * acos(0))

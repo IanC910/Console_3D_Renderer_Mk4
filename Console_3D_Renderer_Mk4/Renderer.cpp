@@ -155,11 +155,11 @@ void Renderer::initObjectFromFile(std::string filePath)
 
 void Renderer::calcScreenCoords()
 {
-	Vector3 ObsToP; // vector from observer0.pos to a vertex
-	Vector3 pVert; // Projection of ObsToP onto the vertical plane that the observer's line of sight goes through
-	Vector3 pHoriz; // Projection of ObsToP onto HPlane
-	Vector3 nVPlane; // Normal to the vertical plane: perpendicular to the user's line of sight, and whose z component is 0
-	Vector3 nHPlane; // Normal to HPlane: perpendicular to observer0.pos and nVPlane. Note: HPlane is not actually horizontal
+	Vec3 ObsToP; // vector from observer0.pos to a vertex
+	Vec3 pVert; // Projection of ObsToP onto the vertical plane that the observer's line of sight goes through
+	Vec3 pHoriz; // Projection of ObsToP onto HPlane
+	Vec3 nVPlane; // Normal to the vertical plane: perpendicular to the user's line of sight, and whose z component is 0
+	Vec3 nHPlane; // Normal to HPlane: perpendicular to observer0.pos and nVPlane. Note: HPlane is not actually horizontal
 
 	for (int i = 0; i < vertices.size(); i++)
 	{
@@ -229,12 +229,12 @@ void Renderer::drawEnvironment()
 
 void Renderer::writeUI()
 {
-	Display::write(Vector2(1, Display::height - 1), "Use W, A, S, and D to move in the horizontal plane.");
-	Display::write(Vector2(1, Display::height - 2), "Use SPACE and CTRL to move vertically.");
-	Display::write(Vector2(1, Display::height - 3), "Use Arrow Keys to Look Around.");
-	Display::write(Vector2(1, Display::height - 4), "Press ESC to exit the program.");
+	Display::write(Vec2(1, Display::height - 1), "Use W, A, S, and D to move in the horizontal plane.");
+	Display::write(Vec2(1, Display::height - 2), "Use SPACE and CTRL to move vertically.");
+	Display::write(Vec2(1, Display::height - 3), "Use Arrow Keys to Look Around.");
+	Display::write(Vec2(1, Display::height - 4), "Press ESC to exit the program.");
 
-	Display::write(Vector2(Display::width / 2 - 10, Display::height - 1), "Object: " + ((objectName == "") ? "(No object name)" : objectName));
+	Display::write(Vec2(Display::width / 2 - 10, Display::height - 1), "Object: " + ((objectName == "") ? "(No object name)" : objectName));
 }
 
 void Renderer::processUserInput(long long deltaTime)
@@ -251,7 +251,7 @@ void Renderer::processUserInput(long long deltaTime)
 	// Down arrow:  0x28
 	// Esc:         0x1B
 
-	Vector3 directionOfMovement;
+	Vec3 directionOfMovement;
 
 	// W: move forward
 	if (GetAsyncKeyState('W'))
@@ -335,9 +335,9 @@ void Renderer::processUserInput(long long deltaTime)
 
 void Renderer::titleScreen()
 {
-	Display::write(Vector2(Display::width / 2.0f - 9, Display::height / 2.0f), "3D Console Renderer");
-	Display::write(Vector2(Display::width / 2.0f - 10, Display::height / 2.0f - 1), "Rendering object \"" + objectName + "\"");
-	Display::write(Vector2(Display::width / 2.0f - 10, Display::height / 2.0f - 2), "Press Space to Start");
+	Display::write(Vec2(Display::width / 2.0f - 9, Display::height / 2.0f), "3D Console Renderer");
+	Display::write(Vec2(Display::width / 2.0f - 10, Display::height / 2.0f - 1), "Rendering object \"" + objectName + "\"");
+	Display::write(Vec2(Display::width / 2.0f - 10, Display::height / 2.0f - 2), "Press Space to Start");
 	Display::update();
 
 	while (!GetAsyncKeyState(VK_SPACE))

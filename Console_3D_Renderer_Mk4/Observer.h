@@ -12,8 +12,8 @@ public:
 
 	Observer(float, float, float);
 
-	Vector3 pos;
-	Vector3 lineOfSight; // Line of Sight
+	Vec3 pos;
+	Vec3 lineOfSight; // Line of Sight
 
 	double vertLookAngle;
 	double horizLookAngle;

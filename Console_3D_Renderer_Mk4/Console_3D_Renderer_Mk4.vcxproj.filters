@@ -36,13 +36,13 @@
     <ClCompile Include="Triangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Common\Vector2.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\Vector3.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="Common\Debug.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Vec2.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Vec3.cpp">
       <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -65,13 +65,13 @@
     <ClInclude Include="Common\Common.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\Vector2.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\Vector3.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="Common\Debug.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Vec2.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Vec3.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

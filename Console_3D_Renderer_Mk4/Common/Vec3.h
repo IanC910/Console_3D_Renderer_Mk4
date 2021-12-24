@@ -1,58 +1,58 @@
-#ifndef VECTOR3_H
-#define VECTOR3_H
+#ifndef VEC3_H
+#define VEC3_H
 
-class Vector3
+class Vec3
 {
 public:
-	Vector3();
+	Vec3();
 
 	// Constructor that sets the Vectors pos
-	Vector3(double, double, double);
+	Vec3(double, double, double);
 
-	Vector3 operator + (Vector3);
+	Vec3 operator + (Vec3);
 
-	void operator += (Vector3);
+	void operator += (Vec3);
 
-	Vector3 operator - (Vector3);
+	Vec3 operator - (Vec3);
 
-	void operator -= (Vector3);
+	void operator -= (Vec3);
 
 	// Projection of the vector onto A
-	Vector3 projOnto(Vector3);
+	Vec3 projOnto(Vec3);
 
 	// Scalar Projection of the vector onto A
-	double scalarProjOnto(Vector3);
+	double scalarProjOnto(Vec3);
 
 	// Returns length of the vector
 	double abs();
 
 	// Returns the vector with the same direction and magnitude of 1
-	Vector3 normalized();
+	Vec3 normalized();
 
 	// Dot product
-	double dot(Vector3);
+	double dot(Vec3);
 
 	// Dot product
-	double operator * (Vector3);
+	double operator * (Vec3);
 
 	// Scalar multiplication
-	Vector3 operator * (double);
+	Vec3 operator * (double);
 
 	// Scalar multiplication
 	void operator *= (double);
 
 	// Scalar division
-	Vector3 operator / (double);
+	Vec3 operator / (double);
 
 	// Scalar division
 	void operator /= (double);
 
 	// Cross product
-	Vector3 cross(Vector3);
+	Vec3 cross(Vec3);
 
 	void set(double, double, double);
 
-	void set(Vector3);
+	void set(Vec3);
 
 	double x;
 	double y;
@@ -60,6 +60,6 @@ public:
 };
 
 // Also scalar multiplication, but oppopsite order
-Vector3 operator * (double, Vector3);
+Vec3 operator * (double, Vec3);
 
 #endif
