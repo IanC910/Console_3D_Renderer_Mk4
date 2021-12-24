@@ -24,19 +24,24 @@ class Renderer
 {
 public:
 
-	static void render(std::string filePath);
 	// Renders the object in the object text file at filePath
+	static void render(std::string filePath);
 
-	static void initRenderer(int screenWidth, int screenHeight);
 	// This must be called once before rendering
 	// Enter the desired dimensions of the screen as arguements
+	static void initRenderer(int screenWidth, int screenHeight);
 
 
 private:
 	
-	static double moveSpeed; // Move Speed in Units per Microsecond
-	static double turnSpeed; // Turning Speed in Radians per mircosecond
-	static int FOV; // Field of View in Degrees
+	// Move Speed in Units per Microsecond
+	static double moveSpeed;
+
+	// Turning Speed in Radians per mircosecond
+	static double turnSpeed;
+
+	// Field of View in Degrees
+	static int FOV;
 
 	static Observer observer0;
 	static std::string objectName;
@@ -45,12 +50,19 @@ private:
 	static std::vector<Vertex*> vertices;
 	static std::vector<Triangle*> triangles;
 
-	Renderer(); // Private Constructor so class cannot be instantiated
+	// Private Constructor so class cannot be instantiated
+	Renderer();
+
 	static void initObjectFromFile(std::string filePath);
+
 	static void calcScreenCoords();
+
 	static void drawEnvironment();
+
 	static void writeUI();
+
 	static void titleScreen();
+
 	static void reset();
 
 };
