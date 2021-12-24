@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{4e6d9079-22b6-471e-9415-f092a9401338}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -24,9 +27,6 @@
     <ClCompile Include="Vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VectorMath.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Observer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -36,8 +36,14 @@
     <ClCompile Include="Triangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Common.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Common\Debug.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Vector2.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Vector3.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -45,12 +51,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VectorMath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Observer.h">
@@ -61,6 +61,18 @@
     </ClInclude>
     <ClInclude Include="Triangle.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Common.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Debug.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Vector2.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Vector3.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

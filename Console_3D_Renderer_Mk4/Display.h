@@ -1,7 +1,7 @@
 #ifndef Display_H
 #define Display_H
 
-#include "Common.h"
+#include "Common/Common.h"
 
 class Display
 {

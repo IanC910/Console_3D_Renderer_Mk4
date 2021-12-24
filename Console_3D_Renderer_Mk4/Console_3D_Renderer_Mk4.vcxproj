@@ -139,22 +139,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Common\Debug.cpp" />
+    <ClCompile Include="Common\Vector2.cpp" />
+    <ClCompile Include="Common\Vector3.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Observer.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Display.cpp" />
-    <ClCompile Include="Common.cpp" />
     <ClCompile Include="Triangle.cpp" />
-    <ClCompile Include="VectorMath.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Common.h" />
+    <ClInclude Include="Common\Common.h" />
+    <ClInclude Include="Common\Debug.h" />
+    <ClInclude Include="Common\Vector2.h" />
+    <ClInclude Include="Common\Vector3.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="Triangle.h" />
-    <ClInclude Include="VectorMath.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

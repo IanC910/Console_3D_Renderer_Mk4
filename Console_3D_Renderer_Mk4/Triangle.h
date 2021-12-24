@@ -1,7 +1,7 @@
 #ifndef	TRIANGLE_H
 #define	TRIANGLE_H
 
-#include "Common.h"
+#include "Common/Common.h"
 #include "Vertex.h"
 
 class Triangle

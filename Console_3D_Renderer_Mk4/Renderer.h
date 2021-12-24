@@ -13,7 +13,7 @@ initRenderer must be called prior to render, and its arguments are the dimension
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "Common.h"
+#include "Common/Common.h"
 
 #include "Display.h"
 #include "Vertex.h"
