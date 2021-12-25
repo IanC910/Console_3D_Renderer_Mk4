@@ -155,17 +155,33 @@ void Renderer::initObjectFromFile(std::string filePath)
 
 void Renderer::calcScreenCoords()
 {
-	Vec3 ObsToP; // vector from observer0.pos to a vertex
-	Vec3 pVert; // Projection of ObsToP onto the vertical plane that the observer's line of sight goes through
-	Vec3 pHoriz; // Projection of ObsToP onto HPlane
-	Vec3 nVPlane; // Normal to the vertical plane: perpendicular to the user's line of sight, and whose z component is 0
-	Vec3 nHPlane; // Normal to HPlane: perpendicular to observer0.pos and nVPlane. Note: HPlane is not actually horizontal
+	// Vector from observer0.pos to a vertex
+	Vec3 ObsToV;
+
+	// Position of the Vector relative to the obesrver in the observer's basis vectors, e1, e2, and e3
+	Vec3 VPosInObsBasis;
+
+	// Observer's basis vectors, follows right hand rule. These will produce a subspace of R3, consistent with the right hand rule
+	Vec3 e1, e2, e3;
+
+
+	// Calculate Observer's basis vectors...
+
+	// e2 is the line of sight
+	e2 = observer0.lineOfSight.normalized();
+	// e1 is the line of sight rotated clockwise 90 degrees and a z component of 0
+	e1 = {-e2.y, e2.x, 0};
+	// e3 is e1 cross e2
+	e3 = e1.cross(e2);
+
 
 	for (int i = 0; i < vertices.size(); i++)
 	{
-		// project vector ObsToP onto vertical and horizontal planes to get angles
+		ObsToV = vertices[i]->pos - observer0.pos;
 
-		ObsToP = vertices[i]->pos - observer0.pos;
+	
+
+		/*ObsToP = vertices[i]->pos - observer0.pos;
 
 		nVPlane.set(observer0.lineOfSight.y, -observer0.lineOfSight.x, 0); // Right Rotation of observer0.lineOfSight (with z = 0) clockwise. Direction is important for finding nHPlane
 		nHPlane = nVPlane.cross(observer0.lineOfSight); // order is important. nHPlane must be pointing up (z > 0). Note: HPlane is not actually horizontal
@@ -200,7 +216,7 @@ void Renderer::calcScreenCoords()
 		if (vertices[i]->screenPos.y > Display::height + 5)
 			vertices[i]->screenPos.y = Display::height + 5;
 		if (vertices[i]->screenPos.y < -Display::height - 5)
-			vertices[i]->screenPos.y = -Display::height - 5;
+			vertices[i]->screenPos.y = -Display::height - 5;*/
 	}
 }
 
@@ -210,7 +226,7 @@ void Renderer::drawEnvironment()
 	for (int t = 0; t < triangles.size(); t++) // for each triangle
 	{
 		// brightness is an indicator of how much the triangle is facing the observer
-		double brightness = triangles[t]->normal.normalized() * (observer0.pos - triangles[t]->vertices[0]->pos).normalized();
+		double brightness = triangles[t]->normal() * (observer0.pos - triangles[t]->vertices[0]->pos).normalized();
 
 		if (brightness > 0)
 		{

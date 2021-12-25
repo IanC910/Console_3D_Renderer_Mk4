@@ -30,19 +30,22 @@
     <ClCompile Include="Observer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Display.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Triangle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Common\Debug.cpp">
+    <ClCompile Include="Display.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="Common\Vec2.cpp">
+    <ClCompile Include="Matrix.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="Common\Vec3.cpp">
+    <ClCompile Include="Vec2.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Vec3.cpp">
       <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,22 +59,25 @@
     <ClInclude Include="Observer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Display.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Triangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Common\Common.h">
+    <ClInclude Include="Display.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\Debug.h">
+    <ClInclude Include="Debug.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\Vec2.h">
+    <ClInclude Include="Matrix.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\Vec3.h">
+    <ClInclude Include="Vec2.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Vec3.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

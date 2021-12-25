@@ -1,7 +1,7 @@
 #ifndef OBSERVER_H
 #define OBSERVER_H
 
-#include "Common/Common.h"
+#include "Common.h"
 
 
 class Observer

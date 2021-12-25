@@ -4,10 +4,19 @@
 class Vec2
 {
 public:
+
+	double x;
+	double y;
+
+	// Default constructor
 	Vec2();
 	
 	// Constructor that sets the vector's position
 	Vec2(double, double);
+
+	/////////////////////////////
+	// Vector operations
+	/////////////////////////////
 
 	Vec2 operator + (Vec2);
 
@@ -34,6 +43,12 @@ public:
 	
 	// Dot product
 	double operator * (Vec2);
+
+	void set(Vec2);
+
+	/////////////////////////////
+	// Scalar operations
+	/////////////////////////////
 	
 	// Scalar multiplication
 	Vec2 operator * (double);
@@ -48,11 +63,6 @@ public:
 	void operator /= (double);
 
 	void set(double, double);
-
-	void set(Vec2);
-
-	double x;
-	double y;
 };
 
 // Also scalar multiplication, but oppopsite order

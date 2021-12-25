@@ -7,10 +7,15 @@ void run();
 
 // Tests
 void testDrawTriangle();
+void testSetVectorWithArray();
+void testMatrixAssignment();
+void testMatrixMultiply();
 
 int main()
 {
-	run();
+	//run();
+
+	testMatrixMultiply();
 
 	return 0;
 }
@@ -71,5 +76,72 @@ void testDrawTriangle()
 	Display::update();
 
 	while (!GetAsyncKeyState(VK_ESCAPE)) {}
+}
+
+void testSetVectorWithArray()
+{
+	Vec2 v2 = {3, 4};
+	Vec3 v3 = {1, 2, 3};
+
+	std::cout << v2.x << " " << v2.y << "\n";
+	std::cout << v3.x << " " << v3.y << " " << v3.z << "\n";
+
+	v2 = {7, 8};
+	v3 = {12, 15, 17};
+
+	std::cout << v2.x << " " << v2.y << "\n";
+	std::cout << v3.x << " " << v3.y << " " << v3.z << "\n";
+}
+
+void testMatrixAssignment()
+{
+	Matrix m0(3, 3);
+
+	m0.set0();
+
+	m0[1][2] = 5;
+
+	std::cout << m0[1][2] << "\n";
+
+	Matrix m1(5, 5);
+	m1 = m0;
+
+	std::cout << m1[1][2] << "\n";
+
+	m0[1][2] = 3;
+
+	// This should still be 5
+	std::cout << m1[1][2] << "\n";
+}
+
+void testMatrixMultiply()
+{
+	Matrix a(3, 3);
+	Matrix b(3, 2);
+
+	// Set a
+	for (int i = 0; i < 9; i++)
+	{
+		a[i / 3][i % 3] = i;
+	}
+
+	std::cout << "a:\n";
+	a.print();
+
+	// Set b
+	for (int i = 0; i < 6; i++)
+	{
+		b[i / 2][i % 2] = 4 - i;
+	}
+
+	std::cout << "b:\n";
+	b.print();
+
+	Matrix prod = a * b;
+
+	std::cout << "prod\n";
+	prod.print();
+
+	// The result should be {{2, -1}, {20, 8}, {38, 17}}
 }
 

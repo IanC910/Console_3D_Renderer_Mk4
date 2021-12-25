@@ -1,13 +1,25 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include <vector>
+
 class Vec3
 {
 public:
+
+	double x;
+	double y;
+	double z;
+
+	// Default constructor
 	Vec3();
 
 	// Constructor that sets the Vectors pos
 	Vec3(double, double, double);
+
+	/////////////////////////////
+	// Vector operations
+	/////////////////////////////
 
 	Vec3 operator + (Vec3);
 
@@ -35,6 +47,15 @@ public:
 	// Dot product
 	double operator * (Vec3);
 
+	// Cross product
+	Vec3 cross(Vec3);
+
+	void set(Vec3);
+
+	/////////////////////////////
+	// Scalar operations
+	/////////////////////////////
+
 	// Scalar multiplication
 	Vec3 operator * (double);
 
@@ -47,16 +68,7 @@ public:
 	// Scalar division
 	void operator /= (double);
 
-	// Cross product
-	Vec3 cross(Vec3);
-
 	void set(double, double, double);
-
-	void set(Vec3);
-
-	double x;
-	double y;
-	double z;
 };
 
 // Also scalar multiplication, but oppopsite order
