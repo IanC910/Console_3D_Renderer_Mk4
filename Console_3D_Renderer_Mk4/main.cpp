@@ -16,8 +16,6 @@ int main()
 {
 	run();
 
-	// testMatrix3x3Inverse();
-
 	return 0;
 }
 
