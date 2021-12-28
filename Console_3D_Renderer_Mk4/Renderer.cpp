@@ -213,8 +213,9 @@ void Renderer::calcScreenCoords()
 		vertices[i]->screenPos /= tan(horizFOVinRadians / 2.0f);
 		vertices[i]->screenPos *= Display::getWidth();
 
-		vertices[i]->screenPos.x *= sqrt(2.0);
-		vertices[i]->screenPos.y /= sqrt(2.0);
+		// Scale coordinates . In the terminal, characters are ~ 2 times as tall as they are wide
+		// Shouldn't scale x because the calculations are based on the horizontal FOV. Just scale y instead
+		vertices[i]->screenPos.y /= 2.0;
 
 		vertices[i]->screenPos.x += Display::getWidth() / 2.0f;
 		vertices[i]->screenPos.y += Display::getHeight() / 2.0f;
