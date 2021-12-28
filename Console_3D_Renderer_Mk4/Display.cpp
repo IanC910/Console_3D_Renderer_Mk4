@@ -200,3 +200,13 @@ bool Display::isValid(Vec2 P)
 {
 	return ((P.y < height) && (P.y > 0) && (P.x < width) && (P.x > 0));
 }
+
+int Display::getHeight()
+{
+	return height;
+}
+
+int Display::getWidth()
+{
+	return width;
+}

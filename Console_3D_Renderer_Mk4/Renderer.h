@@ -33,20 +33,27 @@ public:
 
 
 private:
-	
+
+	// Parameters
+	//////////////////////////////////////////////////////
+
 	// Move Speed in Units per Microsecond
 	static double moveSpeed;
+
+	// Coefficient for vertical move speed as a multiple of moveSpeed
+	static double vertMoveSpeedCoef;
 
 	// Turning Speed in Radians per mircosecond
 	static double turnSpeed;
 
-	// Field of View in Degrees
-	static int FOV;
+	// Horizontal Field of View in Degrees
+	static int horizFOV;
+
+	//////////////////////////////////////////////////////
 
 	static bool quit;
 	static Observer observer0;
 	static std::string objectName;
-	static double UnitsPerRadian;
 	static bool initialized;
 	static std::vector<Vertex*> vertices;
 	static std::vector<Triangle*> triangles;

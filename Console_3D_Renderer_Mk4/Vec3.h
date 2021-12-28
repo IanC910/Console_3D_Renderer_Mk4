@@ -71,7 +71,7 @@ public:
 	void set(double, double, double);
 };
 
-// Also scalar multiplication, but oppopsite order
+// Also scalar multiplication, but opposite order
 Vec3 operator * (double, Vec3);
 
 #endif

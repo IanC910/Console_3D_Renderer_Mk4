@@ -48,6 +48,9 @@
     <ClCompile Include="Vec3.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="Matrix3x3.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h">
@@ -78,6 +81,9 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="Vec3.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix3x3.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

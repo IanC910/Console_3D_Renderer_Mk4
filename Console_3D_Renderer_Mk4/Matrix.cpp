@@ -19,11 +19,11 @@ Matrix::Matrix(const Matrix &copiedMatrix) : height(copiedMatrix.height), width(
 	for (int i = 0; i < height; i++)
 		rowVectors[i] = new RowVector(width);
 
-	for (int i = 0; i < height; i++)
+	for (int i = 1; i <= height; i++)
 	{
-		for (int j = 0; j < width; j++)
+		for (int j = 1; j <= width; j++)
 		{
-			(*this)[i][j] = (*copiedMatrix.rowVectors[i])[j];
+			(*this)[i][j] = (*copiedMatrix.rowVectors[i-1])[j];
 		}
 	}
 }
@@ -43,11 +43,11 @@ void Matrix::operator = (const Matrix& copiedMatrix)
 	for (int i = 0; i < height; i++)
 		rowVectors[i] = new RowVector(width);
 
-	for (int i = 0; i < height; i++)
+	for (int i = 1; i <= height; i++)
 	{
-		for (int j = 0; j < width; j++)
+		for (int j = 1; j <= width; j++)
 		{
-			(*this)[i][j] = (*copiedMatrix.rowVectors[i])[j];
+			(*this)[i][j] = (*copiedMatrix.rowVectors[i-1])[j];
 		}
 	}
 }
@@ -73,9 +73,9 @@ void Matrix::set0()
 
 void Matrix::print()
 {
-	for (int i = 0; i < height; i++)
+	for (int i = 1; i <= height; i++)
 	{
-		for (int j = 0; j < width; j++)
+		for (int j = 1; j <= width; j++)
 		{
 			std::cout << (*this)[i][j] << "  ";
 		}
@@ -98,19 +98,19 @@ Matrix Matrix::multiply(Matrix& m0)
 {
 	if (width != m0.getHeight())
 	{
-		std::cout << "Matrix multiplication error: Incampatible dimensions";
+		std::cout << "Matrix multiplication error: Incompatible dimensions";
 		exit(1);
 	}
 		
 	Matrix product(height, m0.getWidth());
 	int dot_len = width;
 
-	for (int i = 0; i < product.getHeight(); i++)
+	for (int i = 1; i <= product.getHeight(); i++)
 	{
-		for (int j = 0; j < product.getWidth(); j++)
+		for (int j = 1; j <= product.getWidth(); j++)
 		{
 			// Calculate element at i, j as a dot product of this matrix's row i and m0's column j
-			for (int dot_idx = 0; dot_idx < width; dot_idx++)
+			for (int dot_idx = 1; dot_idx <= dot_len; dot_idx++)
 			{
 				product[i][j] += (*this)[i][dot_idx] * m0[dot_idx][j];
 			}
@@ -127,22 +127,40 @@ Matrix Matrix::operator * (Matrix& m0)
 
 Matrix::RowVector& Matrix::operator [] (int heightIndex)
 {
-	return *(rowVectors[heightIndex]);
+	if (heightIndex > height || heightIndex <= 0)
+	{
+		std::cout << "Matrix element access error: Row index out of range";
+		exit(1);
+	}
+
+
+	return *(rowVectors[heightIndex - 1]);
 }
 
 Matrix Matrix::multiply(double multiplier)
 {
 	Matrix product(height, width);
 
-	for (int i = 0; i < height; i++)
+	for (int i = 1; i <= height; i++)
 	{
-		for (int j = 0; j < width; j++)
+		for (int j = 1; j <= width; j++)
 		{
 			product[i][j] = (*this)[i][j] * multiplier;
 		}
 	}
 
 	return product;
+}
+
+Matrix Matrix::operator * (double multiplier)
+{
+	return multiply(multiplier);
+}
+
+
+Matrix operator * (double multiplier, Matrix m0)
+{
+	return m0 * multiplier;
 }
 
 
@@ -174,5 +192,11 @@ void Matrix::RowVector::set0()
 
 double& Matrix::RowVector::operator [] (int widthIndex)
 {
-	return elements[widthIndex];
+	if (widthIndex > width || widthIndex <= 0)
+	{
+		std::cout << "Matrix element access error: Column index out of range";
+		exit(1);
+	}
+
+	return elements[widthIndex - 1];
 }

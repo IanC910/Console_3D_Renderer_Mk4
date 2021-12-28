@@ -33,18 +33,26 @@ public:
 
 	Matrix operator * (Matrix&);
 
+	// Returns the vector at the row of the integer argument
+	// Note: Matrix indices start at 1, not 0
 	RowVector& operator [] (int);
 
 	// Scalar multiplication
 	// Multiplies every element in the matrix by the argument
 	Matrix multiply(double);
 
-private:
+	// Scalar multiplication
+	Matrix operator * (double);
+
+protected:
 	
 	int height;
 	int width;
 	RowVector** rowVectors;
 };
+
+// Also scalar multiplication, but opposite order
+Matrix operator * (double, Matrix);
 
 
 class Matrix::RowVector

@@ -10,12 +10,13 @@ void testDrawTriangle();
 void testSetVectorWithArray();
 void testMatrixAssignment();
 void testMatrixMultiply();
+void testMatrix3x3Inverse();
 
 int main()
 {
-	//run();
+	run();
 
-	testMatrixMultiply();
+	// testMatrix3x3Inverse();
 
 	return 0;
 }
@@ -121,18 +122,14 @@ void testMatrixMultiply()
 
 	// Set a
 	for (int i = 0; i < 9; i++)
-	{
-		a[i / 3][i % 3] = i;
-	}
+		a[i / 3 + 1][i % 3 + 1] = i;
 
 	std::cout << "a:\n";
 	a.print();
 
 	// Set b
 	for (int i = 0; i < 6; i++)
-	{
-		b[i / 2][i % 2] = 4 - i;
-	}
+		b[i / 2 + 1][i % 2 + 1] = 4 - i;
 
 	std::cout << "b:\n";
 	b.print();
@@ -143,5 +140,24 @@ void testMatrixMultiply()
 	prod.print();
 
 	// The result should be {{2, -1}, {20, 8}, {38, 17}}
+}
+
+void testMatrix3x3Inverse()
+{
+	Matrix3x3 m0;
+
+	// set m0
+	for (int i = 0; i < 9; i++)
+	{
+		m0[i / 3 + 1][i % 3 + 1] = (8 - i) * (7 - i);
+	}
+
+	m0.print();
+
+	std::cout << "\n";
+
+	Matrix3x3 m1 = m0.inverse();
+
+	m1.print();
 }
 

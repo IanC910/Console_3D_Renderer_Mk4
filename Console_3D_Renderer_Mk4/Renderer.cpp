@@ -1,14 +1,14 @@
 #include "Renderer.h"
 
 double Renderer::moveSpeed = 6.0 / 1000000.0;
-double Renderer::turnSpeed = 1.4 / 1000000.0;
-int Renderer::FOV = 90;
+double Renderer::vertMoveSpeedCoef = 0.8;
+double Renderer::turnSpeed = 1.1 / 1000000.0;
+int Renderer::horizFOV = 100;
 
 bool Renderer::quit = 0;
 
 Observer Renderer::observer0;
 std::string Renderer::objectName = "";
-double Renderer::UnitsPerRadian;
 bool Renderer::initialized = false;
 std::vector<Vertex*> Renderer::vertices;
 std::vector<Triangle*> Renderer::triangles;
@@ -23,12 +23,9 @@ void Renderer::initRenderer(int screenWidth, int screenHeight)
 {
 	Debug::info("Renderer", "Initializing Renderer...");
 
-	UnitsPerRadian = Display::width / (FOV * PI / 180.0);
-
 	Display::initDisplay(screenWidth, screenHeight);
 
-	observer0 = Observer(8, 0, 0);
-	observer0.horizLookAngle = PI;
+	observer0 = Observer(-8, 0, 0);
 
 	reset();
 
@@ -72,7 +69,7 @@ void Renderer::render(std::string filePath)
 		//  Reset screen array
 		Display::setBlank();
 
-		//  Checking elapsed time
+		//  Checking elapsed time in microseconds
 		timeEnd = std::chrono::system_clock::now();
 		long long deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(timeEnd - timeStart).count();
 		timeStart = std::chrono::system_clock::now();
@@ -159,64 +156,78 @@ void Renderer::calcScreenCoords()
 	Vec3 ObsToV;
 
 	// Position of the Vector relative to the obesrver in the observer's basis vectors, e1, e2, and e3
-	Vec3 VPosInObsBasis;
+	Matrix vertexPosInObsBasis(3, 1);
 
 	// Observer's basis vectors, follows right hand rule. These will produce a subspace of R3, consistent with the right hand rule
 	Vec3 e1, e2, e3;
+
+	// Matrix with the observer's basis vectors as columns, and its inverse
+	Matrix3x3 basis;
+	Matrix3x3 basisInv;
+
+	// Matrix with ObsToV as its only column;
+	Matrix mObsToV(3, 1);
 
 
 	// Calculate Observer's basis vectors...
 
 	// e2 is the line of sight
-	e2 = observer0.lineOfSight.normalized();
-	// e1 is the line of sight rotated clockwise 90 degrees and a z component of 0
-	e1 = {-e2.y, e2.x, 0};
-	// e3 is e1 cross e2
+	e2 = observer0.lineOfSight();
+	// e1 is the line of sight rotated clockwise 90 degrees and a z component of 0 so that its horizontal
+	e1 = {e2.y, -e2.x, 0};
+	// e3 is e1 cross e2, perpendicular to both e1 and e2
 	e3 = e1.cross(e2);
+
+	// Set Matrix basis and inverse
+	basis.setColumnVectors(e1, e2, e3);
+	basisInv = basis.inverse();
+
+
+	double horizFOVinRadians = (double)horizFOV * PI / 180.0f;
 
 
 	for (int i = 0; i < vertices.size(); i++)
 	{
-		ObsToV = vertices[i]->pos - observer0.pos;
+		ObsToV = vertices[i]->pos - observer0.pos();
 
-	
+		// if the vertex is behind the observer
+		if (ObsToV * observer0.lineOfSight() < 0)
+		{
+			// Set the vertex out of view;
+			vertices[i]->screenPos.set(-5, -5);
+			continue;
+		}
 
-		/*ObsToP = vertices[i]->pos - observer0.pos;
+		mObsToV[1][1] = ObsToV.x;
+		mObsToV[2][1] = ObsToV.y;
+		mObsToV[3][1] = ObsToV.z;
 
-		nVPlane.set(observer0.lineOfSight.y, -observer0.lineOfSight.x, 0); // Right Rotation of observer0.lineOfSight (with z = 0) clockwise. Direction is important for finding nHPlane
-		nHPlane = nVPlane.cross(observer0.lineOfSight); // order is important. nHPlane must be pointing up (z > 0). Note: HPlane is not actually horizontal
+		vertexPosInObsBasis = basisInv * mObsToV;
 
-		pVert = ObsToP - ObsToP.projOnto(nVPlane); // Project ObsToP onto the vertical plane
-		pHoriz = ObsToP - ObsToP.projOnto(nHPlane); // Project ObsToP onto HPlane
+		vertices[i]->screenPos = {
+			vertexPosInObsBasis[1][1] / vertexPosInObsBasis[2][1],
+			vertexPosInObsBasis[3][1] / vertexPosInObsBasis[2][1]
+		};
 
+		// Scale vertical and horizontal screen positions to match size of virtual plane
+		vertices[i]->screenPos /= tan(horizFOVinRadians / 2.0f);
+		vertices[i]->screenPos *= Display::getWidth();
 
-		// Dot product formula rearranged to isolate the angle
-		// multiply x and divide y by sqrt(2) for scaling (in the terminal, the characters are ~2x as tall as they are wide)
-		vertices[i]->screenPos.y = (int)(acos(pVert * observer0.lineOfSight / (pVert.abs() * observer0.lineOfSight.abs())) * UnitsPerRadian) / sqrt(2.0);
-		vertices[i]->screenPos.x = (int)(acos(pHoriz * observer0.lineOfSight / (pHoriz.abs() * observer0.lineOfSight.abs())) * UnitsPerRadian) * sqrt(2.0);
-		
+		vertices[i]->screenPos.x *= sqrt(2.0);
+		vertices[i]->screenPos.y /= sqrt(2.0);
 
-		// Note: At this point, the screen position components are positive by default because of acos()
-		// The following if-statements use the normal vectors to the vertical plane and HPlane to determine where on the screen the vertex should be:
-
-		if (vertices[i]->pos * nHPlane < observer0.pos * nHPlane) // if the vertex is in the bottom half of the screen
-			vertices[i]->screenPos.y *= -1;
-
-		if (vertices[i]->pos * nVPlane < observer0.pos * nVPlane) // if the vertex is in the left half of the screen
-			vertices[i]->screenPos.x *= -1;
-
-		vertices[i]->screenPos.x += Display::width / 2;
-		vertices[i]->screenPos.y += Display::height / 2;
+		vertices[i]->screenPos.x += Display::getWidth() / 2.0f;
+		vertices[i]->screenPos.y += Display::getHeight() / 2.0f;
 
 		// Cap the screen positions. Otherwise, Display::drawTriangle bugs sometimes
-		if (vertices[i]->screenPos.x > Display::width + 5)
-			vertices[i]->screenPos.x = Display::width + 5;
-		if (vertices[i]->screenPos.x < -Display::width - 5)
-			vertices[i]->screenPos.x = -Display::width - 5;
-		if (vertices[i]->screenPos.y > Display::height + 5)
-			vertices[i]->screenPos.y = Display::height + 5;
-		if (vertices[i]->screenPos.y < -Display::height - 5)
-			vertices[i]->screenPos.y = -Display::height - 5;*/
+		if (vertices[i]->screenPos.x >  Display::getWidth() + 5)
+			vertices[i]->screenPos.x =  Display::getWidth() + 5;
+		if (vertices[i]->screenPos.x < -Display::getWidth() - 5)
+			vertices[i]->screenPos.x = -Display::getWidth() - 5;
+		if (vertices[i]->screenPos.y >  Display::getHeight() + 5)
+			vertices[i]->screenPos.y =  Display::getHeight() + 5;
+		if (vertices[i]->screenPos.y < -Display::getHeight() - 5)
+			vertices[i]->screenPos.y = -Display::getHeight() - 5;
 	}
 }
 
@@ -226,7 +237,7 @@ void Renderer::drawEnvironment()
 	for (int t = 0; t < triangles.size(); t++) // for each triangle
 	{
 		// brightness is an indicator of how much the triangle is facing the observer
-		double brightness = triangles[t]->normal() * (observer0.pos - triangles[t]->vertices[0]->pos).normalized();
+		double brightness = triangles[t]->normal() * (observer0.pos() - triangles[t]->vertices[0]->pos).normalized();
 
 		if (brightness > 0)
 		{
@@ -245,12 +256,12 @@ void Renderer::drawEnvironment()
 
 void Renderer::writeUI()
 {
-	Display::write(Vec2(1, Display::height - 1), "Use W, A, S, and D to move in the horizontal plane.");
-	Display::write(Vec2(1, Display::height - 2), "Use SPACE and CTRL to move vertically.");
-	Display::write(Vec2(1, Display::height - 3), "Use Arrow Keys to Look Around.");
-	Display::write(Vec2(1, Display::height - 4), "Press ESC to exit the program.");
+	Display::write(Vec2(1, Display::getHeight() - 1), "Use W, A, S, and D to move in the horizontal plane.");
+	Display::write(Vec2(1, Display::getHeight() - 2), "Use SPACE and CTRL to move vertically.");
+	Display::write(Vec2(1, Display::getHeight() - 3), "Use Arrow Keys to Look Around.");
+	Display::write(Vec2(1, Display::getHeight() - 4), "Press ESC to exit the program.");
 
-	Display::write(Vec2(Display::width / 2 - 10, Display::height - 1), "Object: " + ((objectName == "") ? "(No object name)" : objectName));
+	Display::write(Vec2(Display::getWidth() / 2 - 10, Display::getHeight() - 1), "Object: " + ((objectName == "") ? "(No object name)" : objectName));
 }
 
 void Renderer::processUserInput(long long deltaTime)
@@ -267,72 +278,65 @@ void Renderer::processUserInput(long long deltaTime)
 	// Down arrow:  0x28
 	// Esc:         0x1B
 
-	Vec3 directionOfMovement;
 
 	// W: move forward
 	if (GetAsyncKeyState('W'))
 	{
-		directionOfMovement = observer0.lineOfSight;
-		directionOfMovement.z = 0;
-		observer0.pos += directionOfMovement * moveSpeed * deltaTime / directionOfMovement.abs();
+		observer0.moveForward(moveSpeed * deltaTime);
 	}
 
 	// S: move backward
 	if (GetAsyncKeyState('S'))
 	{
-		directionOfMovement = observer0.lineOfSight;
-		directionOfMovement.z = 0;
-		observer0.pos += directionOfMovement * (-moveSpeed) * deltaTime / directionOfMovement.abs();
+		observer0.moveBackward(moveSpeed * deltaTime);
 	}
 
 	// A: move left
 	if (GetAsyncKeyState('A')) // Move Left
 	{
-		directionOfMovement.set(-observer0.lineOfSight.y, observer0.lineOfSight.x, 0); // lineOfSight rotated PI/2 counter clockwise
-		observer0.pos += directionOfMovement * moveSpeed * deltaTime / directionOfMovement.abs();
+		observer0.moveLeft(moveSpeed * deltaTime);
 	}
 
 	// D: move right
 	if (GetAsyncKeyState('D')) // Move Right
 	{
-		directionOfMovement.set(observer0.lineOfSight.y, -observer0.lineOfSight.x, 0); // lineOfSight rotated PI/2 clockwise
-		observer0.pos += directionOfMovement * moveSpeed * deltaTime / directionOfMovement.abs();
+		observer0.moveRight(moveSpeed * deltaTime);
 	}
 
 	// Space: move up
 	if (GetAsyncKeyState(VK_SPACE)) // Move UP
 	{
-		observer0.pos.z += moveSpeed * deltaTime * 0.8;
+		observer0.moveUp(moveSpeed * deltaTime * vertMoveSpeedCoef);
 	}
 
 	// LCTRL: move down
 	if (GetAsyncKeyState(VK_LCONTROL)) // Move Down
 	{
-		observer0.pos.z -= moveSpeed * deltaTime * 0.8;
+		observer0.moveDown(moveSpeed * deltaTime * vertMoveSpeedCoef);
 	}
 
 	// Up arrow: look up
-	if (GetAsyncKeyState(VK_UP) && observer0.vertLookAngle < PI / 2.0 - PI / 180.0) // Look Up
+	if (GetAsyncKeyState(VK_UP)) // Look Up
 	{
-		observer0.vertLookAngle += turnSpeed * deltaTime;
+		observer0.lookUp(turnSpeed * deltaTime);
 	}
 
 	// Down arrow: look down
-	if (GetAsyncKeyState(VK_DOWN) && observer0.vertLookAngle > -PI / 2.0 + PI / 180.0) // Look Down
+	if (GetAsyncKeyState(VK_DOWN)) // Look Down
 	{
-		observer0.vertLookAngle -= turnSpeed * deltaTime;
+		observer0.lookDown(turnSpeed * deltaTime);
 	}
 
 	// Left arrow: look left
 	if (GetAsyncKeyState(VK_LEFT)) // Look left
 	{
-		observer0.horizLookAngle += turnSpeed * deltaTime;
+		observer0.lookLeft(turnSpeed * deltaTime);
 	}
 
 	// Right arrow: look right
 	if (GetAsyncKeyState(VK_RIGHT)) // Look Right
 	{
-		observer0.horizLookAngle -= turnSpeed * deltaTime;
+		observer0.lookRight(turnSpeed * deltaTime);
 	}
 
 	// Escape: quit
@@ -341,19 +345,13 @@ void Renderer::processUserInput(long long deltaTime)
 		quit = 1;
 	}
 
-	// Update lineOfSight
-	observer0.lineOfSight.set(
-		cos(observer0.horizLookAngle) * cos(observer0.vertLookAngle),
-		sin(observer0.horizLookAngle) * cos(observer0.vertLookAngle),
-		sin(observer0.vertLookAngle));
-
 }
 
 void Renderer::titleScreen()
 {
-	Display::write(Vec2(Display::width / 2.0f - 9, Display::height / 2.0f), "3D Console Renderer");
-	Display::write(Vec2(Display::width / 2.0f - 10, Display::height / 2.0f - 1), "Rendering object \"" + objectName + "\"");
-	Display::write(Vec2(Display::width / 2.0f - 10, Display::height / 2.0f - 2), "Press Space to Start");
+	Display::write(Vec2(Display::getWidth() / 2.0f - 9, Display::getHeight() / 2.0f), "3D Console Renderer");
+	Display::write(Vec2(Display::getWidth() / 2.0f - 10, Display::getHeight() / 2.0f - 1), "Rendering object \"" + objectName + "\"");
+	Display::write(Vec2(Display::getWidth() / 2.0f - 10, Display::getHeight() / 2.0f - 2), "Press Space to Start");
 	Display::update();
 
 	while (!GetAsyncKeyState(VK_SPACE))

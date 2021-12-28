@@ -16,6 +16,7 @@
 #include "Vec2.h"
 #include "Vec3.h"
 #include "Matrix.h"
+#include "Matrix3x3.h"
 
 #include "Debug.h"
 
