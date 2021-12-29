@@ -14,10 +14,10 @@ std::vector<Vertex*> Renderer::vertices;
 std::vector<Triangle*> Renderer::triangles;
 
 // Lightest to darkest shades in inverted console colours
-wchar_t lightShade		= 0x2588; // lightest
-wchar_t medLightShade	= 0x2593;
-wchar_t medDarkShade	= 0x2592;
-wchar_t darkShade		= 0x2591; // darkest
+#define LIGHT_SHADE		0x2588
+#define MED_LIGHT_SHADE 0x2593
+#define MED_DARK_SHADE	0x2592
+#define DARK_SHADE		0x2591
 
 void Renderer::initRenderer(int screenWidth, int screenHeight)
 {
@@ -240,15 +240,18 @@ void Renderer::drawEnvironment()
 		// brightness is an indicator of how much the triangle is facing the observer
 		double brightness = triangles[t]->normal() * (observer0.pos() - triangles[t]->vertices[0]->pos).normalized();
 
+		// Can't do the following. Causes surfaces around corners to be drawn, though they shouldn't be
+		// double brightness = -(triangles[t]->normal() * (observer0.lineOfSight()).normalized());
+
 		if (brightness > 0)
 		{
 			// Find character to draw based on given brightness
 			wchar_t charToDraw;
 
-			if (brightness > 0.75f)			charToDraw = lightShade;
-			else if (brightness > 0.5f)		charToDraw = medLightShade;
-			else if (brightness > 0.25f)    charToDraw = medDarkShade;
-			else							charToDraw = darkShade;
+			if (brightness > 0.75f)			charToDraw = LIGHT_SHADE;
+			else if (brightness > 0.5f)		charToDraw = MED_LIGHT_SHADE;
+			else if (brightness > 0.25f)    charToDraw = MED_DARK_SHADE;
+			else							charToDraw = DARK_SHADE;
 
 			Display::drawTriangle(triangles[t]->vertices[0]->screenPos, triangles[t]->vertices[1]->screenPos, triangles[t]->vertices[2]->screenPos, charToDraw);
 		}
