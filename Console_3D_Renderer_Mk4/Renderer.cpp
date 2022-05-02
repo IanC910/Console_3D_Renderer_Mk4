@@ -171,11 +171,11 @@ void Renderer::calcScreenCoords()
 
 	// Calculate Observer's basis vectors...
 
-	// e2 is the line of sight
+	// e2 is the line of sight (already normalized)
 	e2 = observer0.lineOfSight();
-	// e1 is the line of sight rotated clockwise 90 degrees and a z component of 0 so that its horizontal
-	e1 = {e2.y, -e2.x, 0};
-	// e3 is e1 cross e2, perpendicular to both e1 and e2
+	// e1 is the line of sight rotated clockwise 90 degrees and a z component of 0 so that its horizontal (normalized)
+	e1 = Vec3(e2.y, -e2.x, 0).normalized();
+	// e3 is e1 cross e2, perpendicular to both e1 and e2 (e3 is already normalized since e1 and e2 are both normalized)
 	e3 = e1.cross(e2);
 
 	// Set Matrix basis and inverse
