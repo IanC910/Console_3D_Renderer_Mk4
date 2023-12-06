@@ -1,6 +1,9 @@
 
 #include "Display.h"
 
+#include <Windows.h>
+#include <String.h>
+
 int Display::width = 120;
 int Display::height = 35;
 
@@ -10,13 +13,22 @@ HANDLE Display::consoleHandle;
 
 void Display::initDisplay(int initWidth, int initHeight)
 {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
 	Debug::info("Display", "Initializing Display...");
 
-	width = initWidth;
-	height = initHeight;
+	// width = initWidth;
+	// height = initHeight;
+
+	std::string dimensionInfo = "Width: " + std::to_string(width) + ", Height: " + std::to_string(height);
+	Debug::info("Display", dimensionInfo);
 
 	// The following chunk of code was derived from https://www.youtube.com/watch?v=xW8skO7MFYw
 	screenArray = new wchar_t[width * height];
+
 	bytesWritten = 0;
 	consoleHandle = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	SetConsoleActiveScreenBuffer(consoleHandle);
@@ -24,6 +36,28 @@ void Display::initDisplay(int initWidth, int initHeight)
 	setBlank();
 
 	Debug::info("Display", "Display Initialized");
+}
+
+void Display::checkForDisplayResize()
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int newWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	int newHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+	if (newWidth != width || newHeight != height)
+	{
+		width = newWidth;
+		height = newHeight;
+
+		delete [] screenArray;
+		screenArray = new wchar_t[width * height];
+
+		setBlank();
+
+		std::string dimensionInfo = "newWidth: " + std::to_string(width) + ", newHeight: " + std::to_string(height);
+		Debug::info("Display", dimensionInfo);
+	}
 }
 
 void Display::update()

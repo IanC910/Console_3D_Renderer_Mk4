@@ -56,6 +56,8 @@ void Renderer::render(std::string filePath)
 	//  Main Loop
 	while (!quit)
 	{
+		Display::checkForDisplayResize();
+
 		calcScreenCoords();
 
 		drawEnvironment();
@@ -248,10 +250,14 @@ void Renderer::drawEnvironment()
 			// Find character to draw based on given brightness
 			wchar_t charToDraw;
 
-			if (brightness > 0.75f)			charToDraw = LIGHT_SHADE;
-			else if (brightness > 0.5f)		charToDraw = MED_LIGHT_SHADE;
-			else if (brightness > 0.25f)    charToDraw = MED_DARK_SHADE;
-			else							charToDraw = DARK_SHADE;
+			if (brightness > 0.75f)
+				charToDraw = LIGHT_SHADE;
+			else if (brightness > 0.5f)
+				charToDraw = MED_LIGHT_SHADE;
+			else if (brightness > 0.25f)
+				charToDraw = MED_DARK_SHADE;
+			else
+				charToDraw = DARK_SHADE;
 
 			Display::drawTriangle(triangles[t]->vertices[0]->screenPos, triangles[t]->vertices[1]->screenPos, triangles[t]->vertices[2]->screenPos, charToDraw);
 		}
@@ -359,7 +365,9 @@ void Renderer::titleScreen()
 	Display::update();
 
 	while (!GetAsyncKeyState(VK_SPACE))
-	{ /* Wait for Space to be pressed */ }
+	{
+		Display::update(); /* Wait for Space to be pressed */
+	}
 }
 
 void Renderer::reset()

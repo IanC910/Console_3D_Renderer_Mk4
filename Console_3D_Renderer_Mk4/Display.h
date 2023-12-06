@@ -11,10 +11,12 @@ public:
 	// Before calling this, the console will behave normally
 	static void initDisplay(int, int);
 
+	static void checkForDisplayResize();
+
 	// Updates terminal by printing the Display array
 	static void update();
 
-	// Writes a wide charcater to the Display array at the position specificed by two integer coordinates
+	// Writes a wide charcater to the Display array at the position specified by two integer coordinates
 	static void write(int, int, wchar_t);
 
 	// Writes a wide character to the Display array at the position specified by the vector
